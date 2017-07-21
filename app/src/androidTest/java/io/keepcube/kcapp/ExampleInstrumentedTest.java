@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("io.keepcube.navtest", appContext.getPackageName());
+        assertEquals("io.keepcube.kcapp", appContext.getPackageName());
     }
 }

@@ -1,4 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!--google's bug fix-->
+    <item name="visible" type="id"/>
+    <item name="masked" type="id"/>
 
     <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">

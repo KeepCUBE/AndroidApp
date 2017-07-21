@@ -21,12 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.keepcube.kcapp.Fragment.Tab.TabDeviceRoomFragment;
+import io.keepcube.kcapp.MainActivity;
 import io.keepcube.kcapp.R;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class AccessoriesFragment extends Fragment {
+
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
 
     public AccessoriesFragment() {
         // Required empty public constructor
@@ -49,19 +53,27 @@ public class AccessoriesFragment extends Fragment {
 
 
         FragAdapter adapter = new FragAdapter(getChildFragmentManager());
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 1");
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 2");
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 3");
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 4");
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 1"); // TODO: 21.7.17 brát z globálních seznamů
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 2"); // TODO: 21.7.17 možná přesunout do konstruktoru?
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 3");
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab 4");
 
-        ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
+        tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
 
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab X");
-        adapter.addFrag(new TabDeviceRoomFragment(), "Tab Y");
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab X");
+//        adapter.addFrag(new TabDeviceRoomFragment(), "Tab Y");
+
+
+        ArrayList<String> roomsNamesList = MainActivity.roomsFrag.getRoomsNamesList();
+
+        for (int i = 0; i < roomsNamesList.size(); i++) {
+            adapter.addFrag(new TabDeviceRoomFragment(), roomsNamesList.get(i));
+        }
+
         adapter.notifyDataSetChanged();
 
 
@@ -69,6 +81,10 @@ public class AccessoriesFragment extends Fragment {
 
 
         return view;
+    }
+
+    public int getSelTabPos() {
+        return tabLayout.getSelectedTabPosition();
     }
 
 

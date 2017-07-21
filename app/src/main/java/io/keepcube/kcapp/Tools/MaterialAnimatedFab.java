@@ -77,6 +77,7 @@ public class MaterialAnimatedFab extends FloatingActionButton implements Animate
         setVisibility(View.VISIBLE);
     }
 
+
     /**
      * Hides the FAB.
      */

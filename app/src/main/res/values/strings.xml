@@ -30,5 +30,10 @@
     <string name="agree">OK</string>
     <string name="disagree">Cancel</string>
     <string name="action_refresh">Refresh</string>
+    <string name="remove">Remove</string>
+    <string name="keep">Keep</string>
+    <string name="room_name">Room name</string>
+    <string name="device_name">Device name</string>
+    <string name="choose">Choose</string>
 
 </resources>
