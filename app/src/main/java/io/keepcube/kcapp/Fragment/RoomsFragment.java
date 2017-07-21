@@ -180,7 +180,7 @@ public class RoomsFragment extends Fragment {
                     classicViewHolder.edit.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(), "edid", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "edid ", Toast.LENGTH_SHORT).show();
                             // TODO: 20.7.17 dat vedet serveru o zmene
                         }
                     });
