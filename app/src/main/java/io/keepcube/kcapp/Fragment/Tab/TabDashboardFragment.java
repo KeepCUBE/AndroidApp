@@ -9,7 +9,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,50 +54,36 @@ public class TabDashboardFragment extends Fragment {
         recycler.setAdapter(adapter);
 
 
-        ItemTouchHelper.Callback as = new ItemTouchHelper.Callback() {
-
-
-            @Override
-            public boolean isLongPressDragEnabled() {
-                return true;
-            }
-
-            @Override
-            public boolean isItemViewSwipeEnabled() {
-                return false;
-            }
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.Callback() {
+//            @Override
+//            public boolean isLongPressDragEnabled() {
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean isItemViewSwipeEnabled() {
+//                return false;
+//            }
 
             @Override
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                Log.d(TAG, "gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms ");
-
-
-                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END;
-                Log.d(TAG, String.valueOf(dragFlags));
-                return makeMovementFlags(dragFlags, 0);
+                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0);
             }
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                Log.d(TAG, "Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv");
                 adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-
-
                 return false;
             }
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                Log.d(TAG, "Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip ");
                 adapter.onItemDismiss(viewHolder.getAdapterPosition());
             }
-        };
+        });
 
-//
-//        ItemTouchHelper.Callback callback =
-//                new SimpleItemTouchHelperCallback(adapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(as);
-        touchHelper.attachToRecyclerView(recycler);
+
+        itemTouchHelper.attachToRecyclerView(recycler);
 
 
 
