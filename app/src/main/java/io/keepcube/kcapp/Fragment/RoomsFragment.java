@@ -69,7 +69,7 @@ public class RoomsFragment extends Fragment {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle("Rooms");
+        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.rooms));
 
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
         recycler.setHasFixedSize(true);
@@ -88,8 +88,7 @@ public class RoomsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
-
+        // když se opětovně zobrazí
     }
 
 
@@ -160,8 +159,8 @@ public class RoomsFragment extends Fragment {
                         @Override
                         public void onClick(View v) {
                             new MaterialDialog.Builder(getContext())
-                                    .title("Are you sure?")
-                                    .content("Are you sure to remove \"" + classicViewHolder.roomName.getText() + "\"? All devices assigned to this room will be moved to \"Uncategorized\".")
+                                    .title(R.string.are_you_sure)
+                                    .content(String.format(getString(R.string.sure_remove_room), classicViewHolder.roomName.getText()))
                                     .positiveText(R.string.remove)
                                     .negativeText(R.string.keep)
                                     .onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -180,7 +179,7 @@ public class RoomsFragment extends Fragment {
                     classicViewHolder.edit.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(), "edid ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "edid", Toast.LENGTH_SHORT).show();
                             // TODO: 20.7.17 dat vedet serveru o zmene
                         }
                     });

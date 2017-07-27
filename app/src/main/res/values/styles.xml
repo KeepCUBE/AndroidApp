@@ -1,7 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!--google's bug fix-->
-    <item name="visible" type="id"/>
-    <item name="masked" type="id"/>
 
     <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -58,5 +55,11 @@
         <item name="android:textColor">@android:color/secondary_text_light</item>
         <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
     </style>
+
+
+    <style name="TextTruncate">
+        <item name="android:ellipsize">end</item>
+    </style>
+
 
 </resources>

@@ -13,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,32 +20,33 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.keepcube.kcapp.Fragment.Tab.TabDeviceRoomFragment;
-import io.keepcube.kcapp.MainActivity;
+import io.keepcube.kcapp.Fragment.Tab.TabDashboardFragment;
 import io.keepcube.kcapp.R;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class AccessoriesFragment extends Fragment {
+public class DashboardFragment extends Fragment {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private FragAdapter adapter;
 
-    public AccessoriesFragment() {
+
+    public DashboardFragment() {
         // Required empty public constructor
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_accessories, container, false);
+        final View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         final AppCompatActivity activity = (AppCompatActivity) getActivity();
         final Context context = getContext();
 
 
         // Title
-        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.accessories));
+        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.dashboard));
 
 
         // Toolbar
@@ -66,24 +66,15 @@ public class AccessoriesFragment extends Fragment {
         tabLayout.setupWithViewPager(viewPager);
 
 
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
-        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-
-
-        // TODO: 21.7.17 brát z globálních seznamů
-        // TODO: 21.7.17 možná přesunout do konstruktoru?
-        // TODO: 21.7.17 předělat interface pro generování
-        ArrayList<String> roomsNamesList = MainActivity.roomsFrag.getRoomsNamesList();
-        for (int i = 0; i < roomsNamesList.size(); i++) {
-            adapter.addFrag(new TabDeviceRoomFragment(/* blank template */), roomsNamesList.get(i));
-        }
+        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 1");
+        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 2");
+        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 3");
         adapter.notifyDataSetChanged();
 
-        // ((ImageView) view.findViewById(R.id.backdrop)).setColorFilter(ContextCompat.getColor(context, R.color.colorPrimary), PorterDuff.Mode.OVERLAY);
 
         return view;
     }
+
 
     public int getSelTabPos() {
         return tabLayout.getSelectedTabPosition();
@@ -118,4 +109,6 @@ public class AccessoriesFragment extends Fragment {
             return fragTitleList.get(position);
         }
     }
+
+
 }

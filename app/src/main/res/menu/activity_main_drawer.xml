@@ -1,36 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_dashboard"
             android:icon="@drawable/ic_xmenu_dashboard"
-            android:title="Dashboard"/>
+            android:title="@string/dashboard"/>
         <item
             android:id="@+id/nav_rooms"
             android:icon="@drawable/ic_xmenu_room"
-            android:title="Rooms"/>
+            android:title="@string/rooms"/>
         <item
             android:id="@+id/nav_accessories"
             android:icon="@drawable/ic_xmenu_device"
-            android:title="Accessories"/>
+            android:title="@string/accessories"/>
         <item
             android:id="@+id/nav_tools"
             android:icon="@drawable/ic_xmenu_manage"
-            android:title="Tools"/>
+            android:title="@string/tools"/>
     </group>
 
-    <!--<item android:title="Communicate">-->
-    <!--<menu>-->
-    <!--<item-->
-    <!--android:id="@+id/nav_share"-->
-    <!--android:icon="@drawable/ic_xmenu_share"-->
-    <!--android:title="Share"/>-->
-    <!--<item-->
-    <!--android:id="@+id/nav_send"-->
-    <!--android:icon="@drawable/ic_xmenu_send"-->
-    <!--android:title="Send"/>-->
-    <!--</menu>-->
-    <!--</item>-->
+    <item android:title="@string/advanced">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_own_device"
+                    android:icon="@drawable/ic_xmenu_manage"
+                    android:title="@string/config_own_device"/>
+            </group>
+        </menu>
+    </item>
 
 </menu>

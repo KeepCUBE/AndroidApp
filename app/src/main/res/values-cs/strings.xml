@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KeepCUBE App</string>
+    <string name="action_refresh">Obnovit</string>
+    <string name="action_settings">Nastavení</string>
+    <string name="add_device">Přidat zařízení</string>
+    <string name="add_room">Přidat místnost</string>
+    <string name="choose">Vybrat</string>
+    <string name="device_name">Název zařízení</string>
+    <string name="keep">Ponechat</string>
+    <string name="navigation_drawer_close">Zavřít navigační panel</string>
+    <string name="navigation_drawer_open">Otevřít navigační panel</string>
+    <string name="negative_text">Zrušit</string>
+    <string name="positive_text">OK</string>
+    <string name="remove">Smazat</string>
+    <string name="room_name">Název místnosti</string>
+    <string name="rooms">Místnosti</string>
+    <string name="scan_code">Naskenujte kód z etikety</string>
+    <string name="choose_room">Zvolte místnost</string>
+    <string name="accessories">Příslušenství</string>
+    <string name="are_you_sure">Opravdu?</string>
+    <string name="cannot_camera_permission">Není možné naskenovat kód, protože nebylo uděleno povolení využívat kameru</string>
+    <string name="choose_another_name">Zvolte jiný název, tento již existuje</string>
+    <string name="create_device">Vytvořit zařízení</string>
+    <string name="device_added_successfully">Zařízení přidáno úspěšně!</string>
+    <string name="name_taken">Tento název již existuje!</string>
+    <string name="no_permission_camera">Aplikace nemá přístup ke kameře</string>
+    <string name="sure_remove_room">Opravdu chcete smazat \"%s\"? Všechna zařízení přiřazená k této místnosti budou přesunuta do \"Uncategorized\".</string>
+    <string name="tools">Nástroje</string>
+    <string name="advanced">Pokročilé</string>
+    <string name="config_own_device">Nastavit vlastní zařízení</string>
+</resources>
