@@ -1,4 +1,4 @@
-package io.keepcube.kcapp.Tools;
+package io.keepcube.kcapp.Tools.Barcode;
 
 import android.content.Context;
 import android.util.AttributeSet;

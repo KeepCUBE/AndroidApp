@@ -41,11 +41,11 @@ import java.util.ArrayList;
 import io.keepcube.kcapp.Fragment.AccessoriesFragment;
 import io.keepcube.kcapp.Fragment.DashboardFragment;
 import io.keepcube.kcapp.Fragment.RoomsFragment;
-import io.keepcube.kcapp.Tools.AutoFitTextureView;
-import io.keepcube.kcapp.Tools.Camera2Source;
+import io.keepcube.kcapp.Tools.Barcode.AutoFitTextureView;
+import io.keepcube.kcapp.Tools.Barcode.Camera2Source;
+import io.keepcube.kcapp.Tools.Barcode.Utils;
 import io.keepcube.kcapp.Tools.MaterialAnimatedFab;
 import io.keepcube.kcapp.Tools.Snacker;
-import io.keepcube.kcapp.Tools.Utils;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_RESULT = 1;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         this.setContentView(R.layout.activity_main);
         final Context context = this;
 
-        fragManag.beginTransaction().replace(R.id.fragment_container, accessoriesFrag).commit();
+        fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
 
         final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
