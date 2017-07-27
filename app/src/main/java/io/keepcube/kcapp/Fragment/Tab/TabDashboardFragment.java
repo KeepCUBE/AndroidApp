@@ -8,12 +8,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import io.keepcube.kcapp.R;
 
@@ -23,6 +27,7 @@ import io.keepcube.kcapp.R;
 public class TabDashboardFragment extends Fragment {
 
     public DashRecyclerAdapter adapter = null;
+    private String TAG = "TabDashboardFragment";
 
     public TabDashboardFragment() {
 
@@ -30,7 +35,7 @@ public class TabDashboardFragment extends Fragment {
 
         // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
         for (int i = 0; i < 20; i++) {
-            adapter.add("x", 0);
+            adapter.add(String.valueOf(i), 0);
         }
 
     }
@@ -46,11 +51,101 @@ public class TabDashboardFragment extends Fragment {
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         recycler.setItemAnimator(new DefaultItemAnimator());
-        recycler.addItemDecoration(new SpaceAroundAll(4)); // 4 (java) + 4 (xml) = 8 (margin)
+//        recycler.addItemDecoration(new SpaceAroundAll(4)); // 4 (java) + 4 (xml) = 8 (margin)
         recycler.setAdapter(adapter);
+
+
+        ItemTouchHelper.Callback as = new ItemTouchHelper.Callback() {
+
+
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return false;
+            }
+
+            @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                Log.d(TAG, "gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms gms ");
+
+
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END;
+                Log.d(TAG, String.valueOf(dragFlags));
+                return makeMovementFlags(dragFlags, 0);
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                Log.d(TAG, "Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv Muv");
+                adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+
+
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                Log.d(TAG, "Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip Swip ");
+                adapter.onItemDismiss(viewHolder.getAdapterPosition());
+            }
+        };
+
+//
+//        ItemTouchHelper.Callback callback =
+//                new SimpleItemTouchHelperCallback(adapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(as);
+        touchHelper.attachToRecyclerView(recycler);
+
+
+
+
+
+
+
 
         return view;
     }
+
+
+    /**
+     * Interface to listen for a move or dismissal event from a {@link ItemTouchHelper.Callback}.
+     *
+     * @author Paul Burke (ipaulpro)
+     */
+    public interface ItemTouchHelperAdapter {
+
+        /**
+         * Called when an item has been dragged far enough to trigger a move. This is called every time
+         * an item is shifted, and <strong>not</strong> at the end of a "drop" event.<br/>
+         * <br/>
+         * Implementations should call {@link RecyclerView.Adapter#notifyItemMoved(int, int)} after
+         * adjusting the underlying data to reflect this move.
+         *
+         * @param fromPosition The start position of the moved item.
+         * @param toPosition   Then resolved position of the moved item.
+         * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
+         * @see RecyclerView.ViewHolder#getAdapterPosition()
+         */
+        void onItemMove(int fromPosition, int toPosition);
+
+
+        /**
+         * Called when an item has been dismissed by a swipe.<br/>
+         * <br/>
+         * Implementations should call {@link RecyclerView.Adapter#notifyItemRemoved(int)} after
+         * adjusting the underlying data to reflect this removal.
+         *
+         * @param position The position of the item dismissed.
+         * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
+         * @see RecyclerView.ViewHolder#getAdapterPosition()
+         */
+        void onItemDismiss(int position);
+    }
+
 
 
     private class SpaceAroundAll extends RecyclerView.ItemDecoration {
@@ -73,7 +168,7 @@ public class TabDashboardFragment extends Fragment {
     }
 
 
-    class DashRecyclerAdapter extends RecyclerView.Adapter<DashRecyclerAdapter.ViewHolder> {
+    class DashRecyclerAdapter extends RecyclerView.Adapter<DashRecyclerAdapter.ViewHolder> implements ItemTouchHelperAdapter {
         static final int ITEM_TYPE_CLASSIC = 0;
         static final int ITEM_TYPE_SPACE = 1;
 
@@ -126,7 +221,7 @@ public class TabDashboardFragment extends Fragment {
             switch (holder.getItemViewType()) {
                 case ITEM_TYPE_CLASSIC:
                     final ClassicViewHolder classicViewHolder = (ClassicViewHolder) holder;
-//                    classicViewHolder.roomName.setText(names.get(position));
+                    classicViewHolder.roomName.setText(names.get(position));
 //                    classicViewHolder.numberOfDevices.setText(String.valueOf(numberOfDevices.get(position)));
 //
 //                    classicViewHolder.delete.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +277,27 @@ public class TabDashboardFragment extends Fragment {
             return names.size();
         }
 
+        @Override
+        public void onItemMove(int fromPosition, int toPosition) {
+            if (fromPosition < toPosition) {
+                for (int i = fromPosition; i < toPosition; i++) {
+                    Collections.swap(names, i, i + 1);
+                    Collections.swap(numberOfDevices, i, i + 1);
+                }
+            } else {
+                for (int i = fromPosition; i > toPosition; i--) {
+                    Collections.swap(names, i, i - 1);
+                    Collections.swap(numberOfDevices, i, i - 1);
+                }
+            }
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+
+        }
+
         class ViewHolder extends RecyclerView.ViewHolder {
             ViewHolder(View v) {
                 super(v);
@@ -197,7 +313,7 @@ public class TabDashboardFragment extends Fragment {
         class ClassicViewHolder extends ViewHolder {
 //            CardView card;
 //            TextView numberOfDevices;
-//            TextView roomName;
+            TextView roomName;
 //            ImageButton delete;
 //            ImageButton edit;
 
@@ -205,7 +321,7 @@ public class TabDashboardFragment extends Fragment {
                 super(v);
 //                card = (CardView) v.findViewById(R.id.room_recycler_card_item);
 //                numberOfDevices = (TextView) v.findViewById(R.id.numberOfDevices);
-//                roomName = (TextView) v.findViewById(R.id.roomName);
+                roomName = (TextView) v.findViewById(R.id.ledtxtv);
 //                delete = (ImageButton) v.findViewById(R.id.delete);
 //                edit = (ImageButton) v.findViewById(R.id.edit);
             }
