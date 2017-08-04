@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Add Room -->
+                    <!-- Add room -->
                     <TextView
                         android:id="@+id/fab_sheet_item_add_room"
                         style="@style/MaterialAnimatedFab.Sheet.Item"

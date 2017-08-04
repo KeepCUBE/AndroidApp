@@ -38,6 +38,7 @@ import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import io.keepcube.kcapp.Data.Home;
 import io.keepcube.kcapp.Fragment.AccessoriesFragment;
 import io.keepcube.kcapp.Fragment.DashboardFragment;
 import io.keepcube.kcapp.Fragment.RoomsFragment;
@@ -46,6 +47,7 @@ import io.keepcube.kcapp.Tools.Barcode.Camera2Source;
 import io.keepcube.kcapp.Tools.Barcode.Utils;
 import io.keepcube.kcapp.Tools.MaterialAnimatedFab;
 import io.keepcube.kcapp.Tools.Snacker;
+import io.paperdb.Paper;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_RESULT = 1;
@@ -53,18 +55,27 @@ public class MainActivity extends AppCompatActivity {
     public static AccessoriesFragment accessoriesFrag = new AccessoriesFragment();
     public static RoomsFragment roomsFrag = new RoomsFragment();
     final Handler handler = new Handler();
-    View savedBarcodeSnackView;
+    public Home home;
+    private View savedBarcodeSnackView;
     private FragmentManager fragManag = this.getSupportFragmentManager();
     private String TAG = "MainActivity";
     private MaterialSheetFab materialSheetFab;
     private AppCompatActivity activity = this;
     private String barcodeMessage;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
         final Context context = this;
+        Home.load(context);
+        Home.Cube.setIP("192.168.0.2");
+//        Home.autoSave(context, 10);
+
+
+
+
 
         fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
 
@@ -75,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
                 // Handle navigation view item clicks here.
                 switch (item.getItemId()) {
                     case R.id.nav_dashboard:
-//                        fragManag.beginTransaction().replace(R.id.fragment_container, dashboardFragment).commit();
                         fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
                         break;
 
@@ -139,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         }).show();
+
+
             }
         });
 
@@ -148,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 materialSheetFab.hideSheet();
 
-                final View roomInputLayout = getLayoutInflater().inflate(R.layout.di_room_input, null);
+                final View roomInputLayout = View.inflate(context, R.layout.di_room_input, null);
 
                 final TextInputLayout roomNameInputLayout = (TextInputLayout) roomInputLayout.findViewById(R.id.roomNameInputLayout);
                 final ArrayList<String> roomsNamesList = roomsFrag.getRoomsNamesList();
@@ -184,16 +196,23 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 View view = dialog.getCustomView();
+                                String name = ((TextInputEditText) view.findViewById(R.id.roomNameInput)).getText().toString();
 
-                                TextInputEditText roomName = (TextInputEditText) view.findViewById(R.id.roomNameInput);
-                                String name = roomName.getText().toString();
+//                                if (roomsFrag.getRoomsNamesList().contains(name)) {
+//                                    Toast.makeText(context, R.string.choose_another_name, Toast.LENGTH_SHORT).show();
+//                                } else {
+//                                    roomsFrag.adapter.add(name, 0); // TODO: 20.7.17 dat vedet serveru o zmene
+//                                    dialog.dismiss();
+//                                }
 
-                                if (roomsFrag.getRoomsNamesList().contains(name)) {
+                                if (Home.hasRoom(name)) {
                                     Toast.makeText(context, R.string.choose_another_name, Toast.LENGTH_SHORT).show();
                                 } else {
-                                    roomsFrag.adapter.add(name, 0); // TODO: 20.7.17 dat vedet serveru o zmene
+                                    Home.addRoom(name, null);
                                     dialog.dismiss();
                                 }
+
+
                             }
                         })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -243,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         // setup the QR reader
-        final View qrPreviewLayout = getLayoutInflater().inflate(R.layout.di_qr_preview, null);
+        final View qrPreviewLayout = View.inflate(context, R.layout.di_qr_preview, null);
 
         TextView c2ninfo = (TextView) qrPreviewLayout.findViewById(R.id.c2ninfo);
 
@@ -368,15 +387,19 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "Zettingz", Toast.LENGTH_SHORT).show();
-            return true;
-        }
         if (id == R.id.action_refresh) {
             Toast.makeText(this, "Refreš", Toast.LENGTH_SHORT).show();
             return true;
         }
+        if (id == R.id.action_settings) {
+            Toast.makeText(this, "Zettingz", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        if (id == R.id.action_clear_mem) {
+            Paper.book().destroy();
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -387,6 +410,20 @@ public class MainActivity extends AppCompatActivity {
         if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
         else if (materialSheetFab.isSheetVisible()) materialSheetFab.hideSheet();
         else super.onBackPressed();
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Home.save();
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Home.save();
     }
 
 

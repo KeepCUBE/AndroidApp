@@ -102,6 +102,8 @@
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="7dp"
         app:behavior_overlapTop="@dimen/behavior_overlap_top"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 

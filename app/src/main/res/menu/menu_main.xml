@@ -4,16 +4,23 @@
       tools:context="io.keepcube.kcapp.MainActivity">
 
     <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_white_refresh"
+        android:title="@string/action_refresh"
+        app:showAsAction="ifRoom"/>
+
+
+    <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never"/>
 
+
     <item
-        android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_white_refresh"
-        android:orderInCategory="101"
-        android:title="@string/action_refresh"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/action_clear_mem"
+        android:title="@string/clr_mem"
+        app:showAsAction="never"/>
+
+
 
 </menu>

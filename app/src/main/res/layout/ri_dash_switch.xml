@@ -32,7 +32,7 @@
                 android:layout_marginTop="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Ledka"
+                android:text="Čudl"
                 android:textAppearance="@android:style/TextAppearance.Material.Headline"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -64,63 +64,20 @@
                 tools:layout_conversion_absoluteX="12dp"
                 tools:layout_conversion_absoluteY="40dp"/>
 
-
-            <android.support.v7.widget.CardView
-                android:clickable="true"
-                android:longClickable="true"
-                android:id="@+id/card_btn_color_led"
-                android:layout_width="0dp"
+            <ToggleButton
+                android:id="@+id/toggleButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:layout_marginTop="7dp"
-                app:cardBackgroundColor="@color/colorPrimary"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/subname"
-                app:layout_constraintHorizontal_bias="0.0">
-
-                <TextView
-                    android:id="@+id/color_txtw_fakebtn_fakelabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="Color"
-                    android:textAlignment="center"
-                    android:textAppearance="@android:style/TextAppearance.Material.Button"
-                    android:textColor="@android:color/white"/>
-            </android.support.v7.widget.CardView>
-
-            <View
-                android:id="@+id/divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
                 android:layout_marginTop="8dp"
-                android:background="@color/dividerColor"
-                app:layout_constraintHorizontal_bias="0.0"
+                android:checked="false"
+                android:text="ToggleButton"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/card_btn_color_led"/>
-
-            <Button
-                android:id="@+id/on_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="ON"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/off_btn"
-                app:layout_constraintTop_toBottomOf="@+id/divider"/>
-
-            <Button
-                android:id="@+id/off_btn"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="OFF"
-                app:layout_constraintLeft_toRightOf="@+id/on_btn"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider"/>
+                app:layout_constraintTop_toBottomOf="@+id/subname"/>
 
 
         </android.support.constraint.ConstraintLayout>

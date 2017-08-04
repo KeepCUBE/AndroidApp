@@ -29,4 +29,8 @@
     <string name="tools">Nástroje</string>
     <string name="advanced">Pokročilé</string>
     <string name="config_own_device">Nastavit vlastní zařízení</string>
+    <string name="n_seconds">%ds</string>
+    <string name="select_color">Zvolte barvu</string>
+    <string name="select_time">Zvolte čas</string>
+    <string name="time_n_s">Čas: %ds</string>
 </resources>
