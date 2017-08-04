@@ -4,6 +4,7 @@ package io.keepcube.kcapp.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
@@ -25,32 +26,34 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 
+import io.keepcube.kcapp.Data.Home;
 import io.keepcube.kcapp.R;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class RoomsFragment extends Fragment {
-
     public RoomsRecyclerAdapter adapter = null;
+    private String TAG = "RoomsFragment";
 
 
     public RoomsFragment() {
-        adapter = new RoomsRecyclerAdapter();
+
 
         // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
 
-        adapter.add("Garáž", 8);
-        adapter.add("Koupelna", 7);
-        adapter.add("Půda", 6);
-        adapter.add("Zahrada", 5);
+//        adapter.add("Garáž", 8);
+//        adapter.add("Koupelna", 7);
+//        adapter.add("Půda", 6);
+//        adapter.add("Zahrada", 5);
+//
+//        adapter.add("Ložnice", 4);
+//        adapter.add("Kuchyň", 3);
+//        adapter.add("Sklep", 2);
+//        adapter.add("Obejvák", 1);
+//
+//        adapter.add("mmmmmmmmmmmmmmm", 9999);
 
-        adapter.add("Ložnice", 4);
-        adapter.add("Kuchyň", 3);
-        adapter.add("Sklep", 2);
-        adapter.add("Obejvák", 1);
-
-        adapter.add("mmmmmmmmmmmmmmm", 9999);
 
     }
 
@@ -71,10 +74,30 @@ public class RoomsFragment extends Fragment {
 
         ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.rooms));
 
+        LinearLayoutManager manager = new LinearLayoutManager(context);
+//        manager.setReverseLayout(true);
+//        manager.setStackFromEnd(true);
+
+        adapter = new RoomsRecyclerAdapter();
+
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
         recycler.setHasFixedSize(true);
-        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        recycler.setLayoutManager(manager);
         recycler.setAdapter(adapter);
+
+
+        Home.setOnRoomChangedListener(new Home.OnRoomChangedListener() {
+            @Override
+            public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
+                adapter.notifyItemInserted(position);
+            }
+
+            @Override
+            public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
+                adapter.notifyItemRemoved(position);
+            }
+        });
+
 
         // TODO: FIXME: když se frag objeví podruhé, je nascrollován tam kde byl.
         // ((AppBarLayout) view.findViewById(R.id.devicesAppBarLay)).setExpanded(false);
@@ -118,6 +141,7 @@ public class RoomsFragment extends Fragment {
             notifyItemInserted(1);
         }
 
+        @Deprecated
         public void remove(String name) {
             int position = names.indexOf(name);
             names.remove(position);
@@ -125,9 +149,24 @@ public class RoomsFragment extends Fragment {
             notifyItemRemoved(position);
         }
 
+        @Deprecated
+        public void remove(int position, @NonNull String name, @Nullable String description) {
+            int index = names.indexOf(name);
+
+            if (position == index + 1) {
+                names.remove(position);
+                numberOfDevices.remove(position);
+                notifyItemRemoved(position);
+            } else throw new IndexOutOfBoundsException("RoomsRecyclerAdapter.remove(): given index != internal index");
+
+
+        }
+
         @Override
         public int getItemViewType(int position) {
-            return position == 0 ? ITEM_TYPE_SPACE : ITEM_TYPE_CLASSIC;
+//            return position == 0 ? ITEM_TYPE_SPACE : ITEM_TYPE_CLASSIC;
+            return ITEM_TYPE_CLASSIC;
+
         }
 
         // Create new views (invoked by the layout manager)
@@ -139,7 +178,7 @@ public class RoomsFragment extends Fragment {
                 View normalView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false);
                 return new ClassicViewHolder(normalView); // view holder for normal items
             } else if (viewType == ITEM_TYPE_SPACE) {
-                View headerRow = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_space_7dp, parent, false);
+                View headerRow = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_nothing, parent, false);
                 return new SpaceViewHolder(headerRow); // view holder for header items
             }
 
@@ -148,12 +187,13 @@ public class RoomsFragment extends Fragment {
 
         // Replace the contents of a view (invoked by the layout manager)
         @Override
-        public void onBindViewHolder(ViewHolder holder, final int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             switch (holder.getItemViewType()) {
                 case ITEM_TYPE_CLASSIC:
                     final ClassicViewHolder classicViewHolder = (ClassicViewHolder) holder;
-                    classicViewHolder.roomName.setText(names.get(position));
-                    classicViewHolder.numberOfDevices.setText(String.valueOf(numberOfDevices.get(position)));
+//                    classicViewHolder.roomName.setText(names.get(position));
+                    classicViewHolder.roomName.setText(Home.room(position).name);
+//                    classicViewHolder.numberOfDevices.setText(String.valueOf(numberOfDevices.get(position)));
 
                     classicViewHolder.delete.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -166,7 +206,10 @@ public class RoomsFragment extends Fragment {
                                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                            adapter.remove(String.valueOf(classicViewHolder.roomName.getText()));
+//                                            adapter.remove(String.valueOf(classicViewHolder.roomName.getText()));
+                                            Home.removeRoom(holder.getAdapterPosition());
+
+
 //                                            Toast.makeText(getContext(), "rimuvink", Toast.LENGTH_SHORT).show();
                                             // TODO: 20.7.17 dat vedet serveru o zmene
                                         }
@@ -205,7 +248,8 @@ public class RoomsFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return names.size();
+//            return names.size();
+            return Home.numberOfRooms();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {

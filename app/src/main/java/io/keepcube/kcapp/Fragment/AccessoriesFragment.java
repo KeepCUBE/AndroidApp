@@ -3,6 +3,8 @@ package io.keepcube.kcapp.Fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.keepcube.kcapp.Data.Home;
 import io.keepcube.kcapp.Fragment.Tab.TabDeviceRoomFragment;
 import io.keepcube.kcapp.MainActivity;
 import io.keepcube.kcapp.R;
@@ -64,6 +68,19 @@ public class AccessoriesFragment extends Fragment {
         adapter = new FragAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
+
+        Home.setOnRoomChangedListener(new Home.OnRoomChangedListener() {
+            @Override
+            public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
+                Log.v("x", "added" + name);
+            }
+
+            @Override
+            public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
+                Log.v("x", "removed");
+
+            }
+        });
 
 
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
