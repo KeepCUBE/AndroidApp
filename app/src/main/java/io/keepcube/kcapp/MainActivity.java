@@ -36,7 +36,6 @@ import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import io.keepcube.kcapp.Data.Home;
 import io.keepcube.kcapp.Fragment.AccessoriesFragment;
@@ -163,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 final View roomInputLayout = View.inflate(context, R.layout.di_room_input, null);
 
                 final TextInputLayout roomNameInputLayout = (TextInputLayout) roomInputLayout.findViewById(R.id.roomNameInputLayout);
-                final ArrayList<String> roomsNamesList = roomsFrag.getRoomsNamesList();
+//                final ArrayList<String> roomsNamesList = roomsFrag.getRoomsNamesList();
 
                 ((TextInputEditText) roomInputLayout.findViewById(R.id.roomNameInput)).addTextChangedListener(new TextWatcher() {
                     @Override
@@ -177,11 +176,16 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void afterTextChanged(Editable s) {
-                        if (roomsNamesList.contains(s.toString()))
+                    public void afterTextChanged(Editable name) {
+                        if (Home.hasRoom(name.toString()))
                             roomNameInputLayout.setError(getString(R.string.name_taken));
                         else if (roomNameInputLayout.isErrorEnabled())
                             roomNameInputLayout.setErrorEnabled(false);
+
+//                        if (roomsNamesList.contains(name.toString()))
+//                            roomNameInputLayout.setError(getString(R.string.name_taken));
+//                        else if (roomNameInputLayout.isErrorEnabled())
+//                            roomNameInputLayout.setErrorEnabled(false);
                     }
                 });
 
@@ -211,8 +215,6 @@ public class MainActivity extends AppCompatActivity {
                                     Home.addRoom(name, null);
                                     dialog.dismiss();
                                 }
-
-
                             }
                         })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {

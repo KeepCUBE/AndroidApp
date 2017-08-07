@@ -20,8 +20,8 @@ public class Home {
 
     // Rooms
     private static ArrayList<Room> rooms = new ArrayList<>();
-    private static ArrayList<String> roomNames = new ArrayList<>();
-    private static ArrayList<String> roomDescriptions = new ArrayList<>();
+//    private static ArrayList<String> roomNames = new ArrayList<>();
+//    private static ArrayList<String> roomDescriptions = new ArrayList<>();
 
     // Users
     // private static ArrayList<User> users = new ArrayList<>();
@@ -34,9 +34,11 @@ public class Home {
             public void run() {
                 if (dataLoaded) save(); // Re-load detection
                 dataLoaded = true;
+
                 rooms = Paper.book().read(Key.ROOMS, new ArrayList<Room>());
-                roomNames = Paper.book().read(Key.ROOMS_NAMES, new ArrayList<String>());
-                roomDescriptions = Paper.book().read(Key.ROOMS_DESCRIPTIONS, new ArrayList<String>());
+
+//                roomNames = Paper.book().read(Key.ROOMS_NAMES, new ArrayList<String>());
+//                roomDescriptions = Paper.book().read(Key.ROOMS_DESCRIPTIONS, new ArrayList<String>());
             }
         }).start();
     }
@@ -47,8 +49,8 @@ public class Home {
             public void run() {
                 long bench = System.currentTimeMillis();
                 Paper.book().write(Key.ROOMS, rooms);
-                Paper.book().write(Key.ROOMS_NAMES, roomNames);
-                Paper.book().write(Key.ROOMS_DESCRIPTIONS, roomDescriptions);
+//                Paper.book().write(Key.ROOMS_NAMES, roomNames);
+//                Paper.book().write(Key.ROOMS_DESCRIPTIONS, roomDescriptions);
                 Log.d(TAG, "Saved! Took " + String.valueOf(System.currentTimeMillis() - bench) + "ms");
             }
         }).start();
@@ -61,7 +63,7 @@ public class Home {
         // TODO: 4.8.17 Pokud se databáze změní externě (checksum se liší), vyhodí se dialog s načítáním a stáhnou se data.
     }
 
-    public static void autoSave(int period) {
+    public static void autoSave(int periodSeconds) {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -70,10 +72,8 @@ public class Home {
                     Log.i(TAG, "Autosaved!");
                 }
             }
-        }, 0, period * 1000);
+        }, 0, periodSeconds * 1000);
     }
-
-
 
 
     // Rooms
@@ -92,19 +92,19 @@ public class Home {
          *      );
          */
 
-        roomNames.add(name);
-        roomDescriptions.add(description);
+//        roomNames.add(name);
+//        roomDescriptions.add(description);
         rooms.add(new Room(name, description));
 
         if (roomChangedListener != null) {
-            roomChangedListener.onRoomAdded(rooms.size(), name, description);
+            roomChangedListener.onRoomAdded(rooms.size() - 1, name, description);
         }
     }
 
 
     public static void removeRoom(int index) {
-        roomNames.remove(index);
-        roomDescriptions.remove(index);
+//        roomNames.remove(index);
+//        roomDescriptions.remove(index);
         Room removed = rooms.remove(index);
         if (roomChangedListener != null) {
             roomChangedListener.onRoomRemoved(index, removed.name, removed.description);
@@ -113,7 +113,8 @@ public class Home {
     }
 
     public static boolean hasRoom(String name) {
-        return roomNames.contains(name);
+        for (int i = 0; i < rooms.size(); i++) if (rooms.get(i).name.equals(name)) return true;
+        return false;
     }
 
     public static int numberOfRooms() {
@@ -136,6 +137,7 @@ public class Home {
     //
 
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     public static Room room(String name) {
         return rooms.get(rooms.indexOf(name));
     }

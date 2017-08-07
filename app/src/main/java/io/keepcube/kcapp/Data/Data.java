@@ -1,8 +1,10 @@
 package io.keepcube.kcapp.Data;
 
 import android.graphics.drawable.GradientDrawable;
+import android.support.v4.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ondrej on 1.8.17.
@@ -50,6 +52,18 @@ public class Data {
         }
 
     }
+
+
+
+
+    public static  class Accessories{
+
+        public static final List<Fragment> fragList = new ArrayList<>();
+        public static final List<String> fragTitleList = new ArrayList<>();
+
+
+    }
+
 
 
 }
