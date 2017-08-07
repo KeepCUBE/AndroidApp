@@ -81,7 +81,7 @@ public class AccessoriesFragment extends Fragment {
     }
 
     public int getSelTabPos() {
-        return tabLayout.getSelectedTabPosition();
+        return tabLayout == null ? 0 : tabLayout.getSelectedTabPosition();
     }
 
 
