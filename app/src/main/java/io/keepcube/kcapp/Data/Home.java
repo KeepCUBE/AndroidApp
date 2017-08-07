@@ -20,10 +20,8 @@ public class Home {
 
     // Rooms
     private static ArrayList<Room> rooms = new ArrayList<>();
-//    private static ArrayList<String> roomNames = new ArrayList<>();
-//    private static ArrayList<String> roomDescriptions = new ArrayList<>();
 
-    // Users
+    // TODO: 8.8.17 Users
     // private static ArrayList<User> users = new ArrayList<>();
 
 
@@ -34,11 +32,7 @@ public class Home {
             public void run() {
                 if (dataLoaded) save(); // Re-load detection
                 dataLoaded = true;
-
                 rooms = Paper.book().read(Key.ROOMS, new ArrayList<Room>());
-
-//                roomNames = Paper.book().read(Key.ROOMS_NAMES, new ArrayList<String>());
-//                roomDescriptions = Paper.book().read(Key.ROOMS_DESCRIPTIONS, new ArrayList<String>());
             }
         }).start();
     }
@@ -49,8 +43,6 @@ public class Home {
             public void run() {
                 long bench = System.currentTimeMillis();
                 Paper.book().write(Key.ROOMS, rooms);
-//                Paper.book().write(Key.ROOMS_NAMES, roomNames);
-//                Paper.book().write(Key.ROOMS_DESCRIPTIONS, roomDescriptions);
                 Log.d(TAG, "Saved! Took " + String.valueOf(System.currentTimeMillis() - bench) + "ms");
             }
         }).start();
@@ -92,24 +84,17 @@ public class Home {
          *      );
          */
 
-//        roomNames.add(name);
-//        roomDescriptions.add(description);
         rooms.add(new Room(name, description));
-
         if (roomChangedListener != null) {
             roomChangedListener.onRoomAdded(rooms.size() - 1, name, description);
         }
     }
 
-
     public static void removeRoom(int index) {
-//        roomNames.remove(index);
-//        roomDescriptions.remove(index);
-        Room removed = rooms.remove(index);
+        Room old = rooms.remove(index);
         if (roomChangedListener != null) {
-            roomChangedListener.onRoomRemoved(index, removed.name, removed.description);
+            roomChangedListener.onRoomRemoved(index, old.name, old.description);
         }
-
     }
 
     public static boolean hasRoom(String name) {
@@ -122,22 +107,14 @@ public class Home {
     }
 
 
-    //
+    public static ArrayList<String> getRoomsNamesList() {
+        ArrayList<String> names = new ArrayList<>();
+        for (Room room : rooms) names.add(room.name);
+        return names;
+    }
 
 
-    //
-
-
-    //
-
-
-    //
-
-
-    //
-
-
-    @SuppressWarnings("SuspiciousMethodCalls")
+    @Deprecated
     public static Room room(String name) {
         return rooms.get(rooms.indexOf(name));
     }
@@ -147,25 +124,17 @@ public class Home {
     }
 
 
-    //
-
-
-    //
-
-
-    //
-
-
+    // Rooms Listener interface
     public static void setOnRoomChangedListener(OnRoomChangedListener listener) {
         roomChangedListener = listener;
     }
-
 
     public interface OnRoomChangedListener {
         void onRoomAdded(int position, @NonNull String name, @Nullable String description);
 
         void onRoomRemoved(int position, @NonNull String name, @Nullable String description);
     }
+
 
     public static class Cube {
         private static String ip = "";
@@ -174,5 +143,6 @@ public class Home {
             Cube.ip = ip;
         }
 
+        // TODO: 8.8.17 Add more features :)
     }
 }

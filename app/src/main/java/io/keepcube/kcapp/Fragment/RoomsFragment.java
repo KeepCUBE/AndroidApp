@@ -115,13 +115,6 @@ public class RoomsFragment extends Fragment {
     }
 
 
-    public ArrayList<String> getRoomsNamesList() {
-        ArrayList<String> ret = new ArrayList<>(adapter.names); // duplicate list of rooms names
-        ret.remove(0); // smazat ten 'null' ošul
-        return ret;
-    }
-
-
     public class RoomsRecyclerAdapter extends RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder> {
         static final int ITEM_TYPE_CLASSIC = 0;
         static final int ITEM_TYPE_SPACE = 1;

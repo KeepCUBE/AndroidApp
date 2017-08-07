@@ -73,9 +73,6 @@ public class MainActivity extends AppCompatActivity {
 //        Home.autoSave(context, 10);
 
 
-
-
-
         fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
 
         final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -160,10 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 materialSheetFab.hideSheet();
 
                 final View roomInputLayout = View.inflate(context, R.layout.di_room_input, null);
-
                 final TextInputLayout roomNameInputLayout = (TextInputLayout) roomInputLayout.findViewById(R.id.roomNameInputLayout);
-//                final ArrayList<String> roomsNamesList = roomsFrag.getRoomsNamesList();
-
                 ((TextInputEditText) roomInputLayout.findViewById(R.id.roomNameInput)).addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -181,11 +175,6 @@ public class MainActivity extends AppCompatActivity {
                             roomNameInputLayout.setError(getString(R.string.name_taken));
                         else if (roomNameInputLayout.isErrorEnabled())
                             roomNameInputLayout.setErrorEnabled(false);
-
-//                        if (roomsNamesList.contains(name.toString()))
-//                            roomNameInputLayout.setError(getString(R.string.name_taken));
-//                        else if (roomNameInputLayout.isErrorEnabled())
-//                            roomNameInputLayout.setErrorEnabled(false);
                     }
                 });
 
@@ -357,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
                         .content(barcodeMessage)
                         .positiveText(R.string.choose)
                         .negativeText(R.string.negative_text)
-                        .items(roomsFrag.getRoomsNamesList()) // TODO: 20.7.17 brát z globálních seznamů
+                        .items(Home.getRoomsNamesList())
                         .itemsCallbackSingleChoice(accessoriesFrag.getSelTabPos(), new MaterialDialog.ListCallbackSingleChoice() {
                             @Override
                             public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
