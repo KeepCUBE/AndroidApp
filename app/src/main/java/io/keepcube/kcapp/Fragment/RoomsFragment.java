@@ -24,8 +24,6 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import java.util.ArrayList;
-
 import io.keepcube.kcapp.Data.Home;
 import io.keepcube.kcapp.R;
 
@@ -33,7 +31,6 @@ import io.keepcube.kcapp.R;
  * A simple {@link Fragment} subclass.
  */
 public class RoomsFragment extends Fragment {
-    public RoomsRecyclerAdapter adapter = null;
     private String TAG = "RoomsFragment";
 
 
@@ -65,6 +62,11 @@ public class RoomsFragment extends Fragment {
         Context context = getContext();
 
 
+        // Title
+        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.rooms));
+
+
+        // Toolbar
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         activity.setSupportActionBar(toolbar);
         DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
@@ -72,14 +74,12 @@ public class RoomsFragment extends Fragment {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        ((CollapsingToolbarLayout) view.findViewById(R.id.collapsing_toolbar)).setTitle(getString(R.string.rooms));
 
+        // Rooms Recycler
+        final RoomsRecyclerAdapter adapter = new RoomsRecyclerAdapter();
         LinearLayoutManager manager = new LinearLayoutManager(context);
-//        manager.setReverseLayout(true);
-//        manager.setStackFromEnd(true);
-
-        adapter = new RoomsRecyclerAdapter();
-
+        // manager.setReverseLayout(true);
+        // manager.setStackFromEnd(true);
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(manager);
@@ -99,7 +99,7 @@ public class RoomsFragment extends Fragment {
         });
 
 
-        // TODO: FIXME: když se frag objeví podruhé, je nascrollován tam kde byl.
+        // TODO: FIXME: když se frag objeví podruhé, je nascrollován tam kde byl. (resetovat instanci?)
         // ((AppBarLayout) view.findViewById(R.id.devicesAppBarLay)).setExpanded(false);
         // LinearLayoutManager layoutManager = (LinearLayoutManager) recycler.getLayoutManager();
         // layoutManager.scrollToPositionWithOffset(0, 0);
@@ -115,133 +115,61 @@ public class RoomsFragment extends Fragment {
     }
 
 
-    public class RoomsRecyclerAdapter extends RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder> {
-        static final int ITEM_TYPE_CLASSIC = 0;
-        static final int ITEM_TYPE_SPACE = 1;
-
-        ArrayList<String> names = new ArrayList<>();
-        ArrayList<Integer> numberOfDevices = new ArrayList<>();
-
-        RoomsRecyclerAdapter() {
-            // Adding some helping items
-            names.add(0, "null");
-            numberOfDevices.add(0, 0);
-        }
-
-        public void add(String item, int devices) {
-            names.add(1, item);
-            numberOfDevices.add(1, devices);
-            notifyItemInserted(1);
-        }
-
-        @Deprecated
-        public void remove(String name) {
-            int position = names.indexOf(name);
-            names.remove(position);
-            numberOfDevices.remove(position);
-            notifyItemRemoved(position);
-        }
-
-        @Deprecated
-        public void remove(int position, @NonNull String name, @Nullable String description) {
-            int index = names.indexOf(name);
-
-            if (position == index + 1) {
-                names.remove(position);
-                numberOfDevices.remove(position);
-                notifyItemRemoved(position);
-            } else throw new IndexOutOfBoundsException("RoomsRecyclerAdapter.remove(): given index != internal index");
-
-
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-//            return position == 0 ? ITEM_TYPE_SPACE : ITEM_TYPE_CLASSIC;
-            return ITEM_TYPE_CLASSIC;
-
-        }
-
+    class RoomsRecyclerAdapter extends RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder> {
         // Create new views (invoked by the layout manager)
         @Override
         public RoomsRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false);
-
-            if (viewType == ITEM_TYPE_CLASSIC) {
-                View normalView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false);
-                return new ClassicViewHolder(normalView); // view holder for normal items
-            } else if (viewType == ITEM_TYPE_SPACE) {
-                View headerRow = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_nothing, parent, false);
-                return new SpaceViewHolder(headerRow); // view holder for header items
-            }
-
-            return new ViewHolder(v);
+            return new ClassicViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false));
         }
 
         // Replace the contents of a view (invoked by the layout manager)
         @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            switch (holder.getItemViewType()) {
-                case ITEM_TYPE_CLASSIC:
-                    final ClassicViewHolder classicViewHolder = (ClassicViewHolder) holder;
-//                    classicViewHolder.roomName.setText(names.get(position));
-                    classicViewHolder.roomName.setText(Home.room(position).name);
-//                    classicViewHolder.numberOfDevices.setText(String.valueOf(numberOfDevices.get(position)));
+        public void onBindViewHolder(final ViewHolder viewHolder, int position) {
+            final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
 
-                    classicViewHolder.delete.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            new MaterialDialog.Builder(getContext())
-                                    .title(R.string.are_you_sure)
-                                    .content(String.format(getString(R.string.sure_remove_room), classicViewHolder.roomName.getText()))
-                                    .positiveText(R.string.remove)
-                                    .negativeText(R.string.keep)
-                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                            adapter.remove(String.valueOf(classicViewHolder.roomName.getText()));
-                                            Home.removeRoom(holder.getAdapterPosition());
+            holder.roomName.setText(Home.room(position).name);
+            holder.devicesCount.setText("0 smart devices");
+            if (Home.room(position).description == null) holder.description.setText(R.string.no_description);
+            else holder.description.setText(Home.room(position).description);
 
+            holder.delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new MaterialDialog.Builder(getContext())
+                            .title(R.string.are_you_sure)
+                            .content(String.format(getString(R.string.sure_remove_room), holder.roomName.getText()))
+                            .positiveText(R.string.remove)
+                            .negativeText(R.string.keep)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    Home.removeRoom(viewHolder.getAdapterPosition());
+                                }
+                            })
+                            .show();
+                }
+            });
 
-//                                            Toast.makeText(getContext(), "rimuvink", Toast.LENGTH_SHORT).show();
-                                            // TODO: 20.7.17 dat vedet serveru o zmene
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
+            holder.edit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "edid", Toast.LENGTH_SHORT).show();
+                    // TODO: 20.7.17 edit room
+                }
+            });
 
+            holder.card.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "CardView.OnClickListener", Toast.LENGTH_SHORT).show();
 
-                    classicViewHolder.edit.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(getContext(), "edid", Toast.LENGTH_SHORT).show();
-                            // TODO: 20.7.17 dat vedet serveru o zmene
-                        }
-                    });
+                }
+            });
 
-
-                    classicViewHolder.card.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(getContext(), "CardView.OnClickListener", Toast.LENGTH_SHORT).show();
-                            // TODO: 20.7.17 materialdialog s nejakýma informacema a tak
-                        }
-                    });
-
-
-                    break;
-
-                case ITEM_TYPE_SPACE:
-                    SpaceViewHolder spaceViewHolder = (SpaceViewHolder) holder;
-                    break;
-            }
         }
-
 
         @Override
         public int getItemCount() {
-//            return names.size();
             return Home.numberOfRooms();
         }
 
@@ -251,24 +179,20 @@ public class RoomsFragment extends Fragment {
             }
         }
 
-        class SpaceViewHolder extends ViewHolder {
-            SpaceViewHolder(View v) {
-                super(v);
-            }
-        }
-
         class ClassicViewHolder extends ViewHolder {
             CardView card;
-            TextView numberOfDevices;
+            TextView devicesCount;
             TextView roomName;
+            TextView description;
             ImageButton delete;
             ImageButton edit;
 
             ClassicViewHolder(View v) {
                 super(v);
                 card = (CardView) v.findViewById(R.id.room_recycler_card_item);
-                numberOfDevices = (TextView) v.findViewById(R.id.numberOfDevices);
+                devicesCount = (TextView) v.findViewById(R.id.devides_count);
                 roomName = (TextView) v.findViewById(R.id.roomName);
+                description = (TextView) v.findViewById(R.id.roomdescription);
                 delete = (ImageButton) v.findViewById(R.id.delete);
                 edit = (ImageButton) v.findViewById(R.id.edit);
             }

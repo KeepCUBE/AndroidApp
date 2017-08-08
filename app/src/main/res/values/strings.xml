@@ -1,4 +1,4 @@
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+<resources>
     <string name="app_name">KeepCUBE App</string>
 
 
@@ -53,5 +53,10 @@
     <string name="animation">Animation</string>
     <string name="color">Color</string>
     <string name="clr_mem">Clear internal memory</string>
+    <string name="no_description">This room has no description.</string>
+    <string name="description">Description (optional)</string>
+    <string name="room_name_hint">living room</string>
+    <string name="skip">Skip</string>
+    <string name="room_description_hint">Some description</string>
 
 </resources>

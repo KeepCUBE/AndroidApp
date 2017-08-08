@@ -178,41 +178,34 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
                 new MaterialDialog.Builder(context)
                         .title(R.string.add_room)
                         .customView(roomInputLayout, true /*wrapInScrollView*/)
                         .positiveText(R.string.positive_text)
                         .negativeText(R.string.negative_text)
                         .autoDismiss(false)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                View view = dialog.getCustomView();
-                                String name = ((TextInputEditText) view.findViewById(R.id.roomNameInput)).getText().toString();
-
-//                                if (roomsFrag.getRoomsNamesList().contains(name)) {
-//                                    Toast.makeText(context, R.string.choose_another_name, Toast.LENGTH_SHORT).show();
-//                                } else {
-//                                    roomsFrag.adapter.add(name, 0); // TODO: 20.7.17 dat vedet serveru o zmene
-//                                    dialog.dismiss();
-//                                }
-
-                                if (Home.hasRoom(name)) {
-                                    Toast.makeText(context, R.string.choose_another_name, Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Home.addRoom(name, null);
-                                    dialog.dismiss();
-                                }
-                            }
-                        })
                         .onNegative(new MaterialDialog.SingleButtonCallback() {
                             @Override
                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 dialog.dismiss();
                             }
                         })
-                        .show();
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                View view = dialog.getCustomView();
+                                String name = ((TextInputEditText) view.findViewById(R.id.roomNameInput)).getText().toString();
+                                String description = ((TextInputEditText) view.findViewById(R.id.roomDescriptionInput)).getText().toString();
+                                if (description.isEmpty()) description = getResources().getString(R.string.no_description);
+
+                                if (Home.hasRoom(name)) {
+                                    Toast.makeText(context, R.string.choose_another_name, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    dialog.dismiss();
+                                    Home.addRoom(name, description);
+                                }
+                            }
+                        }).show();
 
             }
         });
