@@ -22,6 +22,7 @@ public class Data {
     }
 
 
+    @Deprecated
     public static class Dashboard {
         ArrayList<Item> items = new ArrayList<>();
 

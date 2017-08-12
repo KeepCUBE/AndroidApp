@@ -8,7 +8,6 @@ import android.support.annotation.ColorInt;
  */
 
 public class Keyframe {
-    static final int TYPE_NOTHING = -1;
     static final int TYPE_COLOR = 1;
     static final int TYPE_WAIT = 2;
 
@@ -26,11 +25,6 @@ public class Keyframe {
         this.type = TYPE_WAIT;
         this.time = time;
     }
-
-    public Keyframe() {
-        this.type = TYPE_NOTHING;
-    }
-
 
     public static int textColorFromBackground(@ColorInt int color) {
         if ((Color.red(color) * 0.299 + Color.green(color) * 0.587 + Color.blue(color) * 0.114) > 186) return Color.BLACK;

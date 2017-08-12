@@ -1,5 +1,6 @@
 package io.keepcube.kcapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +39,10 @@ import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import java.io.IOException;
 
+import io.keepcube.kcapp.Data.Dashboard;
+import io.keepcube.kcapp.Data.Device;
 import io.keepcube.kcapp.Data.Home;
+import io.keepcube.kcapp.Data.Type;
 import io.keepcube.kcapp.Fragment.AccessoriesFragment;
 import io.keepcube.kcapp.Fragment.DashboardFragment;
 import io.keepcube.kcapp.Fragment.RoomsFragment;
@@ -50,11 +55,11 @@ import io.paperdb.Paper;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_RESULT = 1;
-    public static DashboardFragment dashFrag = new DashboardFragment();
-    public static AccessoriesFragment accessoriesFrag = new AccessoriesFragment();
-    public static RoomsFragment roomsFrag = new RoomsFragment();
     final Handler handler = new Handler();
     public Home home;
+    private DashboardFragment dashFrag = new DashboardFragment();
+    private AccessoriesFragment accessoriesFrag = new AccessoriesFragment();
+    private RoomsFragment roomsFrag = new RoomsFragment();
     private View savedBarcodeSnackView;
     private FragmentManager fragManag = this.getSupportFragmentManager();
     private String TAG = "MainActivity";
@@ -68,9 +73,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_main);
         final Context context = this;
-        Home.load(context);
-        Home.Cube.setIP("192.168.0.2");
+        Home.loadSync(context);
+//        Home.Cube.setIP("192.168.0.2");
 //        Home.autoSave(context, 10);
+
+
+        Log.e("Paper keys", Paper.book().getAllKeys().toString());
 
 
         fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
@@ -130,23 +138,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 materialSheetFab.hideSheet();
-
-                new MaterialDialog.Builder(context)
-                        .title(R.string.create_device)
-                        .customView(R.layout.di_device_input, true /*wrapInScrollView*/)
-                        // TODO: 20.7.17 .autoDismiss(false)
-                        .positiveText(R.string.positive_text)
-                        .negativeText(R.string.negative_text)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
-
-                                continueBarcodeInit(context, v);
-
-                            }
-                        }).show();
-
-
+                continueBarcodeInit(context, v);
             }
         });
 
@@ -237,122 +229,161 @@ public class MainActivity extends AppCompatActivity {
         if (xv != null) savedBarcodeSnackView = xv;
         final View v = savedBarcodeSnackView;
 
-
-        //re-check permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
-            return;
-        }
-
-
-        // setup the QR reader
-        final View qrPreviewLayout = View.inflate(context, R.layout.di_qr_preview, null);
-
-        TextView c2ninfo = (TextView) qrPreviewLayout.findViewById(R.id.c2ninfo);
-
-        final MaterialDialog qrDiag = new MaterialDialog.Builder(context)
-                .title(R.string.scan_code)
-                .customView(qrPreviewLayout, false /*wrapInScrollView*/)
+        new MaterialDialog.Builder(context)
+                .title(R.string.create_device)
+                .customView(R.layout.di_device_input, true /*wrapInScrollView*/)
+                // TODO: 20.7.17 .autoDismiss(false)
+                .positiveText(R.string.positive_text)
                 .negativeText(R.string.negative_text)
-                .show();
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
+                        final String name = ((EditText) dialog.getCustomView().findViewById(R.id.deviceNameInput)).getText().toString();
+
+                        //re-check permission
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
+                            return;
+                        }
 
 
-        final AutoFitTextureView cameraView = (AutoFitTextureView) qrPreviewLayout.findViewById(R.id.camera_view);
+                        // setup the QR reader
+                        final View qrPreviewLayout = View.inflate(context, R.layout.di_qr_preview, null);
+
+                        TextView c2ninfo = (TextView) qrPreviewLayout.findViewById(R.id.c2ninfo);
+
+                        final MaterialDialog qrDiag = new MaterialDialog.Builder(context)
+                                .title(R.string.scan_code)
+                                .customView(qrPreviewLayout, false /*wrapInScrollView*/)
+                                .negativeText(R.string.negative_text)
+                                .show();
+
+
+                        final AutoFitTextureView cameraView = (AutoFitTextureView) qrPreviewLayout.findViewById(R.id.camera_view);
 //                                final TextView barcodeInfo = (TextView) qrPreviewLayout.findViewById(R.id.code_info);
 
 
-        final BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
-                .setBarcodeFormats(Barcode.AZTEC)
-                .build();
+                        final BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
+                                .setBarcodeFormats(Barcode.ALL_FORMATS)
+                                .build();
 
 
-        final Camera2Source cameraSource = new Camera2Source.Builder(context, barcodeDetector)
-                .setFocusMode(Camera2Source.CAMERA_AF_CONTINUOUS_VIDEO)
-                .setFlashMode(Camera2Source.CAMERA_FLASH_AUTO)
-                .setFacing(Camera2Source.CAMERA_FACING_BACK)
-                .build();
+                        final Camera2Source cameraSource = new Camera2Source.Builder(context, barcodeDetector)
+                                .setFocusMode(Camera2Source.CAMERA_AF_CONTINUOUS_VIDEO)
+                                .setFlashMode(Camera2Source.CAMERA_FLASH_AUTO)
+                                .setFacing(Camera2Source.CAMERA_FACING_BACK)
+                                .build();
 
 
-        c2ninfo.setText("Camera2Native = " + String.valueOf(cameraSource.isCamera2NativeCustom()));
+                        c2ninfo.setText("Camera2Native = " + String.valueOf(cameraSource.isCamera2NativeCustom()));
 
 
-        cameraView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                            cameraSource.start(cameraView, Utils.getScreenRotation(context));
-                        } else {
-                            if (shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)) {
-                                Toast.makeText(context, R.string.no_permission_camera, Toast.LENGTH_SHORT).show();
-                            }
-                            requestPermissions(new String[]{android.Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
-                            qrDiag.dismiss(); // dialog will be showed again
-                        }
-                    } else {
-                        cameraSource.start(cameraView, Utils.getScreenRotation(context));
-                    }
-                } catch (IOException ie) {
-                    Log.e("CAMERA SOURCE", ie.getMessage());
-                }
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                cameraSource.stop();
-                return false;
-            }
-        });
-
-
-        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
-            @Override
-            public void receiveDetections(Detector.Detections<Barcode> detections) {
-                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (barcodes.size() != 0) {
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            barcodeMessage = barcodes.valueAt(0).displayValue;
-                            qrDiag.dismiss();
-                            barcodeDetector.release();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void release() {
-                new MaterialDialog.Builder(context)
-                        .title(R.string.choose_room)
-                        .content(barcodeMessage)
-                        .positiveText(R.string.choose)
-                        .negativeText(R.string.negative_text)
-                        .items(Home.getRoomsNamesList())
-                        .itemsCallbackSingleChoice(accessoriesFrag.getSelTabPos(), new MaterialDialog.ListCallbackSingleChoice() {
+                        cameraView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
                             @Override
-                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                                Log.d(TAG, "onSelection: which:" + which);
-                                Log.d(TAG, "onSelection: text:" + text);
-                                // samozřejmě že ne
-                                Snacker.make(v, getString(R.string.device_added_successfully), Snacker.LENGTH_SHORT).show();
-                                return true;
+                            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                                try {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                            cameraSource.start(cameraView, Utils.getScreenRotation(context));
+                                        } else {
+                                            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                                                Toast.makeText(context, R.string.no_permission_camera, Toast.LENGTH_SHORT).show();
+                                            }
+                                            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
+                                            qrDiag.dismiss(); // dialog will be showed again
+                                        }
+                                    } else {
+                                        cameraSource.start(cameraView, Utils.getScreenRotation(context));
+                                    }
+                                } catch (IOException ie) {
+                                    Log.e("CAMERA SOURCE", ie.getMessage());
+                                }
                             }
-                        }).show();
-            }
-        });
 
+                            @Override
+                            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+                            }
+
+                            @Override
+                            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+                            }
+
+                            @Override
+                            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                                cameraSource.stop();
+                                return false;
+                            }
+                        });
+
+
+                        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+                            @Override
+                            public void receiveDetections(Detector.Detections<Barcode> detections) {
+                                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
+                                if (barcodes.size() != 0) {
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            barcodeMessage = barcodes.valueAt(0).displayValue;
+                                            qrDiag.dismiss();
+                                            barcodeDetector.release();
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void release() {
+                                new MaterialDialog.Builder(context)
+                                        .title(R.string.choose_room)
+                                        .content(barcodeMessage) // TODO: 9.8.17 remove
+                                        .positiveText(R.string.choose)
+                                        .negativeText(R.string.negative_text)
+                                        .items(Home.getRoomsNamesList())
+                                        .itemsCallbackSingleChoice(accessoriesFrag.getSelTabPos(), new MaterialDialog.ListCallbackSingleChoice() {
+                                            @Override
+                                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                                Log.d(TAG, "onSelection: which:" + which);
+                                                Log.d(TAG, "onSelection: text:" + text);
+                                                // samozřejmě že ne
+                                                Snacker.make(v, getString(R.string.device_added_successfully), Snacker.LENGTH_SHORT).show();
+
+
+//                                              int type = parseBarcodeMessage().getType(); // TODO: 10.8.17 !
+//                                              int type = Type.LED;
+                                                int type = Integer.parseInt(barcodeMessage);
+
+                                                switch (type) {
+                                                    case Type.LED:
+                                                        Home.room(which).addDevice(new Device.Led(name));
+                                                        Dashboard.registerDevice(which, Home.room(which).numberOfDevices() - 1); // TODO: 11.8.17 !!!!!!!!!!!!!!!!!!!!!
+                                                        break;
+
+                                                    case Type.SWITCH:
+//                                                        Home.room(which).addDevice(new Device.Switch(name /*...*/));
+                                                        break;
+
+                                                    case Type.TEMPERATURE:
+
+                                                        break;
+
+
+                                                    default:
+                                                        // TODO: 9.8.17 custom
+                                                        break;
+                                                }
+
+
+                                                return true;
+                                            }
+                                        }).show();
+                            }
+                        });
+
+                    }
+                }).show();
 
     }
 

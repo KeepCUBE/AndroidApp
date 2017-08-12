@@ -14,6 +14,7 @@ import io.paperdb.Paper;
 public class Home {
     private static String TAG = "Home";
     private static boolean dataLoaded = false;
+//    private static String consistency = null;
 
     // Listeners
     private static OnRoomChangedListener roomChangedListener = null;
@@ -25,7 +26,7 @@ public class Home {
     // private static ArrayList<User> users = new ArrayList<>();
 
 
-    public static void load(Context context) {
+    public static void loadAsync(Context context) {
         Paper.init(context);
         new Thread(new Runnable() {
             @Override
@@ -33,9 +34,23 @@ public class Home {
                 if (dataLoaded) save(); // Re-load detection
                 dataLoaded = true;
                 rooms = Paper.book().read(Key.ROOMS, new ArrayList<Room>());
+//                consistency = Paper.book().read(Key.CONSISTENCY, ""); // TODO: 11.8.17 check consistency
+                Dashboard.load();
             }
         }).start();
     }
+
+    public static void loadSync(Context context) {
+        Paper.init(context);
+        if (dataLoaded) save(); // Re-load detection
+        dataLoaded = true;
+        rooms = Paper.book().read(Key.ROOMS, new ArrayList<Room>());
+//        consistency = Paper.book().read(Key.CONSISTENCY, (String) "asd"); // TODO: 11.8.17 check consistency
+        Dashboard.load();
+    }
+
+
+
 
     public static void save() {
         new Thread(new Runnable() {
@@ -43,6 +58,8 @@ public class Home {
             public void run() {
                 long bench = System.currentTimeMillis();
                 Paper.book().write(Key.ROOMS, rooms);
+//                Paper.book().write(Key.CONSISTENCY, consistency);
+                Dashboard.save();
                 Log.d(TAG, "Saved! Took " + String.valueOf(System.currentTimeMillis() - bench) + "ms");
             }
         }).start();

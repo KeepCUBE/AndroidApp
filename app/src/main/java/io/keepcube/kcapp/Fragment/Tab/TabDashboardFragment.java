@@ -14,22 +14,25 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.SparseArray;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
+import io.keepcube.kcapp.Data.Dashboard;
+import io.keepcube.kcapp.Data.Device;
 import io.keepcube.kcapp.Data.Type;
 import io.keepcube.kcapp.R;
 import io.keepcube.kcapp.Tools.Animation.AnimRecyclerAdapter;
+import io.keepcube.kcapp.Tools.Animation.Animation;
 import io.keepcube.kcapp.Tools.Animation.Keyframe;
 import io.keepcube.kcapp.Tools.ColorPicker.ColorPickerPalette;
 import io.keepcube.kcapp.Tools.ColorPicker.ColorPickerSwatch;
@@ -43,6 +46,7 @@ import me.priyesh.chroma.ColorSelectListener;
  */
 public class TabDashboardFragment extends Fragment {
 
+    //    Animation tempanimation = null;
     public DashRecyclerAdapter adapter = null;
     Fragment fragment = this;
     AppCompatActivity activity = null;
@@ -53,15 +57,15 @@ public class TabDashboardFragment extends Fragment {
         adapter = new DashRecyclerAdapter();
 
 
-        // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
-        for (int i = 0; i < 19; i++) {
-//            adapter.add("Čudl", 0);
-            adapter.add(String.format("Ledka %d", i), 0);
-//            adapter.add(String.valueOf(i), 0);
-        }
-
-        adapter.add("Ledkaaaaaaaaaaaaaaaaaa", 0);
-
+//        // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
+//        for (int i = 0; i < 19; i++) {
+////            adapter.add("Čudl", 0);
+//            adapter.add(String.format("Ledka %d", i), 0);
+////            adapter.add(String.valueOf(i), 0);
+//        }
+//
+//        adapter.add("Ledkaaaaaaaaaaaaaaaaaa", 0);
+//
 
     }
 
@@ -76,8 +80,6 @@ public class TabDashboardFragment extends Fragment {
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         recycler.setItemAnimator(new DefaultItemAnimator());
-//        recycler.getRecycledViewPool().setMaxRecycledViews(Type.LED, 0); // TODO: 1.8.17 IMPORTANT!
-
         recycler.setAdapter(adapter);
 
         new ItemTouchHelper(new ItemTouchHelper.Callback() {
@@ -98,187 +100,116 @@ public class TabDashboardFragment extends Fragment {
             }
         }).attachToRecyclerView(recycler);
 
+        Dashboard.setOnDeviceChangedListener(new Dashboard.OnDeviceChangedListener() {
+            @Override
+            public void onDeviceAdded(int position) {
+                adapter.notifyItemInserted(position);
+            }
+
+            @Override
+            public void onDeviceRemoved(int position) {
+                adapter.notifyItemRemoved(position);
+            }
+        });
+
+
         return view;
     }
 
 
     class DashRecyclerAdapter extends RecyclerView.Adapter<DashRecyclerAdapter.ViewHolder> implements ItemTouchHelperAdapter {
-        static final int ITEM_TYPE_SPACE = -1;
 
-        // TODO: 27.7.17 Zrušit ITEM_TYPE_SPACE, přidat typy pro všechna zařízení
-
-        ArrayList<String> names = new ArrayList<>();
-        ArrayList<Integer> numberOfDevices = new ArrayList<>();
-
-//        ArrayList<Object> views = new ArrayList<>();
-
-
-//        HashMap<Integer, Object> views = new HashMap<>();
-
-        SparseArray<Object> views = new SparseArray<>();
-
-
-        DashRecyclerAdapter() {
-            names.add(0, "null");
-            numberOfDevices.add(0, 0);
-        }
-
-        public void add(String item, int devices) {
-
-            views.append(0, new Type.Create("Ledka").led());
-
-            Type.Create a = (Type.Create) views.get(0);
-
-
-
-
-
-
-            names.add(1, item);
-            numberOfDevices.add(1, devices);
-            notifyItemInserted(1);
-        }
-
-        public void remove(String name) {
-            int position = names.indexOf(name);
-            names.remove(position);
-            numberOfDevices.remove(position);
-            notifyItemRemoved(position);
+        public void remove(String name) { // TODO: 11.8.17
+//            int position = names.indexOf(name);
+//            names.remove(position);
+//            numberOfDevices.remove(position);
+//            notifyItemRemoved(position);
         }
 
         @Override
         public void onItemMove(int fromPosition, int toPosition) {
-            if (fromPosition < toPosition) {
-                for (int i = fromPosition; i < toPosition; i++) {
-                    Collections.swap(names, i, i + 1);
-                    Collections.swap(numberOfDevices, i, i + 1);
-                }
-            } else {
-                for (int i = fromPosition; i > toPosition; i--) {
-                    Collections.swap(names, i, i - 1);
-                    Collections.swap(numberOfDevices, i, i - 1);
-                }
-            }
+            if (toPosition == 0) return; // Avoid swapping with first helper item
+            Dashboard.swap(fromPosition, toPosition);
             notifyItemMoved(fromPosition, toPosition);
+            Log.d(TAG, "Moved from " + fromPosition + " to " + toPosition);
         }
 
         @Override
         public void onItemDismiss(int position) {
+            // Nothing
         }
 
         @Override
         public int getItemViewType(int position) {
-//            return Type.LED;
-            return position == 0 ? ITEM_TYPE_SPACE : Type.LED;
+            return Type.LED; // TODO: 10.8.17 add helper
+//            return position == 0 ? Type.HELPER : Type.LED;
         }
 
         // Create new views (invoked by the layout manager)
         @Override
-        public DashRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false);
+        public DashRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, final int viewType) {
 
             if (viewType == Type.LED) {
-                View normalView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_dash_led, parent, false);
+                final View normalView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_dash_led, parent, false);
                 final ClassicViewHolder view = new ClassicViewHolder(normalView); // view holder for normal items
-                final int position = view.getAdapterPosition();
-
-
-
-
-//                Log.d(TAG, "onCreateViewHolder: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" + position);
-
-
-
 
                 view.colorBtnCard.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
-
                         final View solidOrAnimLayout = getActivity().getLayoutInflater().inflate(R.layout.di_solid_or_anim, null);
 
                         CardView solid = (CardView) solidOrAnimLayout.findViewById(R.id.solid_color_btn);
-                        CardView anim = (CardView) solidOrAnimLayout.findViewById(R.id.color_anim_btn);
+                        final CardView anim = (CardView) solidOrAnimLayout.findViewById(R.id.color_anim_btn);
 
                         GradientDrawable rainbow = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{0xfff44336, 0xff9c27b0, 0xff3f51b5, 0xff03a9f4, 0xff009688, 0xff8bc34a, 0xffffeb3b, 0xffff9800});
                         rainbow.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
                         anim.setBackground(rainbow);
 
                         final MaterialDialog solidOrAnimDiag = new MaterialDialog.Builder(getContext())
-                                .title("Set LED to...")
+                                .title(R.string.set_led_to)
                                 .customView(solidOrAnimLayout, true /*wrapInScrollView*/)
                                 .negativeText(R.string.negative_text)
                                 .show();
-
 
                         solid.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 solidOrAnimDiag.dismiss();
 
-
                                 final ColorPickerPalette colorPickerPalette = (ColorPickerPalette) View.inflate(getContext(), R.layout.color_picker, null);
-
-
-                                final MaterialDialog alert = new MaterialDialog.Builder(getContext())
-                                        .title(R.string.select_color)
+                                final MaterialDialog colorSelectDialog = new MaterialDialog.Builder(getContext())
                                         .customView(colorPickerPalette, true /*wrapInScrollView*/)
+                                        .title(R.string.select_color)
                                         .negativeText(R.string.negative_text)
                                         .neutralText(R.string.custom)
                                         .onNeutral(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-
                                                 new ChromaDialog.Builder()
                                                         .initialColor(ContextCompat.getColor(getContext(), R.color.colorPrimary))
                                                         .colorMode(ColorMode.RGB) // There's also ARGB and HSV
                                                         .onColorSelected(new ColorSelectListener() {
                                                             @Override
                                                             public void onColorSelected(@ColorInt int i) {
-//                                                                    items.get(holder.getAdapterPosition()).color = i;
-//                                                                    colorViewHolder.color.setBackgroundTintList(ColorStateList.valueOf(i));
-//                                                                    colorViewHolder.color.setTextColor(textColorFromBackground(i));
-//
-
-
-                                                                view.colorBtnCard.setBackgroundColor(i);
-                                                                view.label.setTextColor(Keyframe.textColorFromBackground(i));
-                                                                view.label.setText(R.string.color);
+                                                                ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).setSolidColor(i);
+                                                                notifyDataSetChanged();
                                                             }
-                                                        })
-                                                        .create()
-                                                        .show(fragment.getFragmentManager(), "ChromaDialog");
-
-
+                                                        }).create().show(fragment.getFragmentManager(), "ChromaDialog");
                                             }
-                                        })
-                                        .show();
+                                        }).show();
 
-                                final int[] colors = getContext().getResources().getIntArray(R.array.md_rainbow_500);
-
-
-                                //(int) Math.ceil(Math.sqrt(colors.length))
-                                colorPickerPalette.init(colors.length, 4, new ColorPickerSwatch.OnColorSelectedListener() {
+                                final int[] materialRainbow = getContext().getResources().getIntArray(R.array.md_rainbow_500);
+                                colorPickerPalette.init(materialRainbow.length, /* (int) Math.ceil(Math.sqrt(materialRainbow.length)) */ 4, new ColorPickerSwatch.OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int color) {
-                                        alert.dismiss();
-//                                            colorViewHolder.color.setBackgroundTintList(ColorStateList.valueOf(color));
-//                                            colorViewHolder.color.setTextColor(Keyframe.textColorFromBackground(color));
-//                                            items.get(holder.getAdapterPosition()).color = color;
-//
-
-                                        view.colorBtnCard.setBackgroundColor(color);
-                                        view.label.setTextColor(Keyframe.textColorFromBackground(color));
-                                        view.label.setText(R.string.color);
-
-
+                                        ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).setSolidColor(color);
+                                        notifyDataSetChanged();
+                                        colorSelectDialog.dismiss();
                                     }
                                 });
-                                colorPickerPalette.drawPalette(colors, 0);
+                                colorPickerPalette.drawPalette(materialRainbow, 0);
                             }
                         });
-
 
                         anim.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -287,7 +218,6 @@ public class TabDashboardFragment extends Fragment {
                                 View animLayout = getActivity().getLayoutInflater().inflate(R.layout.di_anim_constructor, null);
 
                                 final AnimRecyclerAdapter animAdapter = new AnimRecyclerAdapter(getContext(), fragment);
-                                animAdapter.add(new Keyframe(ContextCompat.getColor(getContext(), R.color.colorPrimary), 1));
 
                                 RecyclerView recycler = (RecyclerView) animLayout.findViewById(R.id.recycler);
                                 recycler.setHasFixedSize(true);
@@ -315,6 +245,25 @@ public class TabDashboardFragment extends Fragment {
                                     }
                                 }).attachToRecyclerView(recycler);
 
+                                CheckBox doLoop = (CheckBox) animLayout.findViewById(R.id.loop_chckbx);
+
+
+                                Animation lastAnimation = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).getAnimation();
+
+                                if (lastAnimation != null) {
+                                    animAdapter.preset(lastAnimation);
+                                    doLoop.setChecked(lastAnimation.loop);
+                                } else {
+                                    animAdapter.add(new Keyframe(ContextCompat.getColor(getContext(), R.color.colorPrimary), 1));
+                                }
+
+                                doLoop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                    @Override
+                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                        animAdapter.setLoop(isChecked);
+                                    }
+                                });
+
                                 animLayout.findViewById(R.id.add_color_btn).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -334,55 +283,44 @@ public class TabDashboardFragment extends Fragment {
                                         .customView(animLayout, false /*wrapInScrollView*/)
                                         .positiveText(R.string.positive_text)
                                         .negativeText(R.string.negative_text)
+                                        .autoDismiss(false)
+                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
                                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                                 // TODO: 1.8.17 send animation data to server
 
-
-                                                view.colorBtnCard.setBackground(animAdapter.getMultiGradient());
-                                                view.label.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-                                                view.label.setText(R.string.animation);
-//                                                    notifyDataSetChanged();
-
+                                                if (animAdapter.getItemCount() < 2) {
+                                                    Toast.makeText(getContext(), R.string.no_2_keyframes, Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Animation animation = animAdapter.getResult(); // TODO: 9.8.17 ulozit k device
+                                                    Device.Led d = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition()));
+                                                    d.setAnimation(animation);
+                                                    notifyDataSetChanged();
+                                                    // TODO: 12.8.17 view.label.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+                                                    dialog.dismiss();
+                                                }
                                             }
-                                        })
-                                        .show();
-
-
+                                        }).show();
                             }
                         });
-
-
                     }
                 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 return view;
 
-            } else if (viewType == ITEM_TYPE_SPACE) {
+            } else if (viewType == Type.HELPER) {
                 View headerRow = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_nothing, parent, false);
                 return new SpaceViewHolder(headerRow); // view holder for header items
             }
 
-            return new ViewHolder(v);
+            return null;
         }
 
         // Replace the contents of a view (invoked by the layout manager)
@@ -390,51 +328,32 @@ public class TabDashboardFragment extends Fragment {
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
             switch (viewHolder.getItemViewType()) {
                 case Type.LED: {
-
-
                     final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
-                    holder.roomName.setText(names.get(position));
+                    Device.Led device = (Device.Led) Dashboard.getDevice(position);
 
+                    holder.name.setText(device.getName());
+                    holder.subname.setText(Dashboard.getParentRoom(position).name);
+                    holder.label.setText(device.getLabel(getContext()));
 
+                    switch (device.getCharacter()) {
+                        case Device.Led.CHARACTER_ANIM:
+                            holder.colorBtnCard.setBackground(device.getAnimation().generateMultigradient(getContext()));
+                            holder.label.setTextColor(0xffffffff); // TODO: 11.8.17 nejak vymyslet z multigradientu
+                            break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                        case Device.Led.CHARACTER_SOLID:
+                            int color = device.getSolidColor();
+                            GradientDrawable dw = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color, color}); // TODO: 10.8.17 ?!
+                            dw.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getContext().getResources().getDisplayMetrics()));
+                            holder.colorBtnCard.setBackground(dw);
+                            holder.label.setTextColor(Keyframe.textColorFromBackground(color));
+                            break;
+                    }
 
                     break;
-
-
                 }
 
-
-                case ITEM_TYPE_SPACE:
+                case Type.HELPER:
                     SpaceViewHolder spaceViewHolder = (SpaceViewHolder) viewHolder;
                     break;
             }
@@ -442,7 +361,7 @@ public class TabDashboardFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return names.size();
+            return Dashboard.numberOfDevices();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
@@ -458,18 +377,18 @@ public class TabDashboardFragment extends Fragment {
         }
 
         class ClassicViewHolder extends ViewHolder {
-            TextView roomName;
+            TextView name;
+            TextView subname;
             TextView label;
             CardView colorBtnCard;
 
             ClassicViewHolder(View v) {
                 super(v);
-                roomName = (TextView) v.findViewById(R.id.name);
+                name = (TextView) v.findViewById(R.id.name);
+                subname = (TextView) v.findViewById(R.id.subname);
                 label = (TextView) v.findViewById(R.id.color_txtw_fakebtn_fakelabel);
                 colorBtnCard = (CardView) v.findViewById(R.id.card_btn_color_led);
             }
         }
     }
-
-
 }

@@ -67,8 +67,8 @@ public class DashboardFragment extends Fragment {
 
 
         adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 1");
-        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 2");
-        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 3");
+//        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 2");
+//        adapter.addFrag(new TabDashboardFragment(/* blank template */), "Group 3");
         adapter.notifyDataSetChanged();
 
 
