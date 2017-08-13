@@ -1,7 +1,6 @@
 package io.keepcube.kcapp.Fragment;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,7 +27,6 @@ import io.keepcube.kcapp.R;
 public class AccessoriesFragment extends Fragment {
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private FragAdapter adapter;
 
     public AccessoriesFragment() {
         // Required empty public constructor
@@ -38,7 +36,6 @@ public class AccessoriesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_accessories, container, false);
         final AppCompatActivity activity = (AppCompatActivity) getActivity();
-        final Context context = getContext();
 
 
         // Title
@@ -55,26 +52,15 @@ public class AccessoriesFragment extends Fragment {
 
 
         // Tabs
+        FragAdapter adapter = new FragAdapter(getChildFragmentManager());
         viewPager = (ViewPager) view.findViewById(R.id.viewpager);
         tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
-        adapter = new FragAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
 
-        Home.setOnRoomChangedListener(new Home.OnRoomChangedListener() {
-            @Override
-            public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
-                adapter.notifyDataSetChanged();
-                tabLayout.setScrollPosition(position, 0f, true);
-                viewPager.setCurrentItem(position);
-            }
-
-            @Override
-            public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
-                adapter.notifyDataSetChanged();
-            }
-        });
+        // Rooms listener
+        Home.setOnRoomChangedListener(adapter);
 
 
         return view;
@@ -85,9 +71,22 @@ public class AccessoriesFragment extends Fragment {
     }
 
 
-    private static class FragAdapter extends FragmentPagerAdapter {
+    private class FragAdapter extends FragmentPagerAdapter implements Home.OnRoomChangedListener {
+
         FragAdapter(FragmentManager manager) {
             super(manager);
+        }
+
+        @Override
+        public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
+            notifyDataSetChanged();
+            tabLayout.setScrollPosition(position, 0f, true);
+            viewPager.setCurrentItem(position);
+        }
+
+        @Override
+        public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
+            notifyDataSetChanged();
         }
 
         @Override
@@ -104,5 +103,6 @@ public class AccessoriesFragment extends Fragment {
         public CharSequence getPageTitle(int position) {
             return Home.room(position).name;
         }
+
     }
 }

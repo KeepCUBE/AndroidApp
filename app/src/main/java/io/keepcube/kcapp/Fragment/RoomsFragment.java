@@ -1,7 +1,6 @@
 package io.keepcube.kcapp.Fragment;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -33,33 +32,10 @@ import io.keepcube.kcapp.R;
 public class RoomsFragment extends Fragment {
     private String TAG = "RoomsFragment";
 
-
-    public RoomsFragment() {
-
-
-        // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
-
-//        adapter.add("Garáž", 8);
-//        adapter.add("Koupelna", 7);
-//        adapter.add("Půda", 6);
-//        adapter.add("Zahrada", 5);
-//
-//        adapter.add("Ložnice", 4);
-//        adapter.add("Kuchyň", 3);
-//        adapter.add("Sklep", 2);
-//        adapter.add("Obejvák", 1);
-//
-//        adapter.add("mmmmmmmmmmmmmmm", 9999);
-
-
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_rooms, container, false);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
-        Context context = getContext();
 
 
         // Title
@@ -76,8 +52,8 @@ public class RoomsFragment extends Fragment {
 
 
         // Rooms Recycler
-        final RoomsRecyclerAdapter adapter = new RoomsRecyclerAdapter();
-        LinearLayoutManager manager = new LinearLayoutManager(context);
+        RoomsRecyclerAdapter adapter = new RoomsRecyclerAdapter();
+        LinearLayoutManager manager = new LinearLayoutManager(getContext());
         // manager.setReverseLayout(true);
         // manager.setStackFromEnd(true);
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
@@ -86,64 +62,32 @@ public class RoomsFragment extends Fragment {
         recycler.setAdapter(adapter);
 
 
-        Home.setOnRoomChangedListener(new Home.OnRoomChangedListener() {
-            @Override
-            public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
-                adapter.notifyItemInserted(position);
-            }
+        // Rooms Listener
+        Home.setOnRoomChangedListener(adapter);
 
-            @Override
-            public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
-                adapter.notifyItemRemoved(position);
-            }
-        });
-
-
-        // TODO: FIXME: když se frag objeví podruhé, je nascrollován tam kde byl. (resetovat instanci?)
-        // ((AppBarLayout) view.findViewById(R.id.devicesAppBarLay)).setExpanded(false);
-        // LinearLayoutManager layoutManager = (LinearLayoutManager) recycler.getLayoutManager();
-        // layoutManager.scrollToPositionWithOffset(0, 0);
 
         return view;
     }
 
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        // když se opětovně zobrazí
-    }
-
-
-    class RoomsRecyclerAdapter extends RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder> {
+    class RoomsRecyclerAdapter extends RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder> implements Home.OnRoomChangedListener {
         // Create new views (invoked by the layout manager)
         @Override
         public RoomsRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ClassicViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false));
-        }
-
-        // Replace the contents of a view (invoked by the layout manager)
-        @Override
-        public void onBindViewHolder(final ViewHolder viewHolder, int position) {
-            final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
-
-            holder.roomName.setText(Home.room(position).name);
-            holder.devicesCount.setText("0 smart devices");
-            if (Home.room(position).description == null) holder.description.setText(R.string.no_description);
-            else holder.description.setText(Home.room(position).description);
+            final ClassicViewHolder holder = new ClassicViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_room, parent, false));
 
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     new MaterialDialog.Builder(getContext())
                             .title(R.string.are_you_sure)
-                            .content(String.format(getString(R.string.sure_remove_room), holder.roomName.getText()))
+                            .content(String.format(getString(R.string.sure_remove_room), Home.room(holder.getAdapterPosition()).name))
                             .positiveText(R.string.remove)
                             .negativeText(R.string.keep)
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    Home.removeRoom(viewHolder.getAdapterPosition());
+                                    Home.removeRoom(holder.getAdapterPosition());
                                 }
                             })
                             .show();
@@ -165,6 +109,29 @@ public class RoomsFragment extends Fragment {
 
                 }
             });
+
+            return holder;
+        }
+
+        @Override
+        public void onRoomAdded(int position, @NonNull String name, @Nullable String description) {
+            notifyItemInserted(position);
+        }
+
+        @Override
+        public void onRoomRemoved(int position, @NonNull String name, @Nullable String description) {
+            notifyItemRemoved(position);
+        }
+
+        // Replace the contents of a view (invoked by the layout manager)
+        @Override
+        public void onBindViewHolder(final ViewHolder viewHolder, int position) {
+            final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
+
+            holder.roomName.setText(Home.room(position).name);
+            holder.devicesCount.setText("0 smart devices");
+            if (Home.room(position).description == null) holder.description.setText(R.string.no_description);
+            else holder.description.setText(Home.room(position).description);
 
         }
 

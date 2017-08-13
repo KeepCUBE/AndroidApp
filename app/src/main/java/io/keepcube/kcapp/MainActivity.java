@@ -12,6 +12,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -56,12 +57,11 @@ import io.paperdb.Paper;
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_RESULT = 1;
     final Handler handler = new Handler();
-    public Home home;
     private DashboardFragment dashFrag = new DashboardFragment();
     private AccessoriesFragment accessoriesFrag = new AccessoriesFragment();
     private RoomsFragment roomsFrag = new RoomsFragment();
     private View savedBarcodeSnackView;
-    private FragmentManager fragManag = this.getSupportFragmentManager();
+    private FragmentManager fragManager = this.getSupportFragmentManager();
     private String TAG = "MainActivity";
     private MaterialSheetFab materialSheetFab;
     private AppCompatActivity activity = this;
@@ -77,11 +77,9 @@ public class MainActivity extends AppCompatActivity {
 //        Home.Cube.setIP("192.168.0.2");
 //        Home.autoSave(context, 10);
 
-
         Log.e("Paper keys", Paper.book().getAllKeys().toString());
 
-
-        fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
+        fadeFragment(dashFrag);
 
         final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -90,24 +88,21 @@ public class MainActivity extends AppCompatActivity {
                 // Handle navigation view item clicks here.
                 switch (item.getItemId()) {
                     case R.id.nav_dashboard:
-                        fragManag.beginTransaction().replace(R.id.fragment_container, dashFrag).commit();
+                        fadeFragment(dashFrag);
                         break;
-
                     case R.id.nav_rooms:
-                        fragManag.beginTransaction().replace(R.id.fragment_container, roomsFrag).commit();
+                        fadeFragment(roomsFrag);
+                        break;
+                    case R.id.nav_accessories:
+                        fadeFragment(accessoriesFrag);
                         break;
 
-                    case R.id.nav_accessories:
-                        fragManag.beginTransaction().replace(R.id.fragment_container, accessoriesFrag).commit();
-                        break;
 
                     case R.id.nav_tools:
-//                        fragManag.beginTransaction().replace(R.id.fragment_container, roomsFrag).commit();
                         Toast.makeText(context, "tůlz", Toast.LENGTH_SHORT).show();
                         break;
 
                     case R.id.nav_own_device:
-//                        fragManag.beginTransaction().replace(R.id.fragment_container, roomsFrag).commit();
                         Toast.makeText(context, "own device", Toast.LENGTH_SHORT).show();
                         break;
                 }
@@ -202,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
     @Override
@@ -240,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
                         final String name = ((EditText) dialog.getCustomView().findViewById(R.id.deviceNameInput)).getText().toString();
 
-                        //re-check permission
+                        // re-check permission
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                             requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
                             return;
@@ -260,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                         final AutoFitTextureView cameraView = (AutoFitTextureView) qrPreviewLayout.findViewById(R.id.camera_view);
-//                                final TextView barcodeInfo = (TextView) qrPreviewLayout.findViewById(R.id.code_info);
+//                      final TextView barcodeInfo = (TextView) qrPreviewLayout.findViewById(R.id.code_info);
 
 
                         final BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
@@ -301,14 +295,10 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
-                            }
+                            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
 
                             @Override
-                            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-                            }
+                            public void onSurfaceTextureUpdated(SurfaceTexture surface) {}
 
                             @Override
                             public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
@@ -418,6 +408,15 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    private void fadeFragment(Fragment fragment) {
+        fragManager.beginTransaction()
+                .setCustomAnimations(R.anim.frag_in, R.anim.frag_out)
+                .replace(R.id.fragment_container, fragment)
+                .commit();
+    }
+
 
     @Override
     public void onBackPressed() {
