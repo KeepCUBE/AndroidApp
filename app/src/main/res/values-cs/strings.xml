@@ -33,4 +33,15 @@
     <string name="select_color">Zvolte barvu</string>
     <string name="select_time">Zvolte čas</string>
     <string name="time_n_s">Čas: %ds</string>
+    <string name="animation">Animace</string>
+    <string name="animation_constructor">Animátor</string>
+    <string name="color">Barva</string>
+    <string name="custom">Vlastní</string>
+    <string name="description">Popis (volitelný)</string>
+    <string name="no_2_keyframes">Animace musí mít nejméně dva klíčové snímky.</string>
+    <string name="no_description">Tento pokoj nemá popis.</string>
+    <string name="room_description_hint">Popis pokoje</string>
+    <string name="room_name_hint">Obývák</string>
+    <string name="set_led_to"></string>
+    <string name="skip">Přeskočit</string>
 </resources>
