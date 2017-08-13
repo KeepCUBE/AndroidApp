@@ -1,13 +1,11 @@
 package io.keepcube.kcapp.Fragment.Tab;
 
-import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,36 +43,13 @@ import me.priyesh.chroma.ColorSelectListener;
  * A simple {@link Fragment} subclass.
  */
 public class TabDashboardFragment extends Fragment {
-
-    //    Animation tempanimation = null;
-    public DashRecyclerAdapter adapter = null;
-    Fragment fragment = this;
-    AppCompatActivity activity = null;
     private String TAG = "TabDashboardFragment";
-
-    public TabDashboardFragment() {
-
-        adapter = new DashRecyclerAdapter();
-
-
-//        // TODO: 20.7.17 načíst z globálních seznamů (stáhnout ze serveru)
-//        for (int i = 0; i < 19; i++) {
-////            adapter.add("Čudl", 0);
-//            adapter.add(String.format("Ledka %d", i), 0);
-////            adapter.add(String.valueOf(i), 0);
-//        }
-//
-//        adapter.add("Ledkaaaaaaaaaaaaaaaaaa", 0);
-//
-
-    }
+    private Fragment fragment = this;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_fragment_dashboard, container, false);
-        activity = (AppCompatActivity) getActivity();
-        final Context context = getContext();
-        final Context c = getContext();
+        final DashRecyclerAdapter adapter = new DashRecyclerAdapter();
 
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
         recycler.setHasFixedSize(true);
@@ -100,38 +75,29 @@ public class TabDashboardFragment extends Fragment {
             }
         }).attachToRecyclerView(recycler);
 
-        Dashboard.setOnDeviceChangedListener(new Dashboard.OnDeviceChangedListener() {
-            @Override
-            public void onDeviceAdded(int position) {
-                adapter.notifyItemInserted(position);
-            }
-
-            @Override
-            public void onDeviceRemoved(int position) {
-                adapter.notifyItemRemoved(position);
-            }
-        });
-
+        Dashboard.setOnDeviceChangedListener(adapter);
 
         return view;
     }
 
 
-    class DashRecyclerAdapter extends RecyclerView.Adapter<DashRecyclerAdapter.ViewHolder> implements ItemTouchHelperAdapter {
+    class DashRecyclerAdapter extends RecyclerView.Adapter<DashRecyclerAdapter.ViewHolder> implements ItemTouchHelperAdapter, Dashboard.OnDeviceChangedListener {
+        @Override
+        public void onDeviceAdded(int position) {
+            notifyItemInserted(++position);
+        }
 
-        public void remove(String name) { // TODO: 11.8.17
-//            int position = names.indexOf(name);
-//            names.remove(position);
-//            numberOfDevices.remove(position);
-//            notifyItemRemoved(position);
+        @Override
+        public void onDeviceRemoved(int position) {
+            notifyItemRemoved(++position);
         }
 
         @Override
         public void onItemMove(int fromPosition, int toPosition) {
             if (toPosition == 0) return; // Avoid swapping with first helper item
-            Dashboard.swap(fromPosition, toPosition);
+            Log.d(TAG, "Moving from " + fromPosition + " to " + toPosition);
+            Dashboard.swap(fromPosition - 1, toPosition - 1);
             notifyItemMoved(fromPosition, toPosition);
-            Log.d(TAG, "Moved from " + fromPosition + " to " + toPosition);
         }
 
         @Override
@@ -141,8 +107,7 @@ public class TabDashboardFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            return Type.LED; // TODO: 10.8.17 add helper
-//            return position == 0 ? Type.HELPER : Type.LED;
+            return position == 0 ? Type.HELPER : Dashboard.getDevice(--position).getType();
         }
 
         // Create new views (invoked by the layout manager)
@@ -191,7 +156,7 @@ public class TabDashboardFragment extends Fragment {
                                                         .onColorSelected(new ColorSelectListener() {
                                                             @Override
                                                             public void onColorSelected(@ColorInt int i) {
-                                                                ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).setSolidColor(i);
+                                                                ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1)).setSolidColor(i);
                                                                 notifyDataSetChanged();
                                                             }
                                                         }).create().show(fragment.getFragmentManager(), "ChromaDialog");
@@ -202,7 +167,7 @@ public class TabDashboardFragment extends Fragment {
                                 colorPickerPalette.init(materialRainbow.length, /* (int) Math.ceil(Math.sqrt(materialRainbow.length)) */ 4, new ColorPickerSwatch.OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int color) {
-                                        ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).setSolidColor(color);
+                                        ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1)).setSolidColor(color);
                                         notifyDataSetChanged();
                                         colorSelectDialog.dismiss();
                                     }
@@ -241,14 +206,14 @@ public class TabDashboardFragment extends Fragment {
 
                                     @Override
                                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                                        animAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+//                                        animAdapter.onItemDismiss(viewHolder.getAdapterPosition());
                                     }
                                 }).attachToRecyclerView(recycler);
 
                                 CheckBox doLoop = (CheckBox) animLayout.findViewById(R.id.loop_chckbx);
 
 
-                                Animation lastAnimation = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition())).getAnimation();
+                                Animation lastAnimation = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1)).getAnimation();
 
                                 if (lastAnimation != null) {
                                     animAdapter.preset(lastAnimation);
@@ -299,7 +264,7 @@ public class TabDashboardFragment extends Fragment {
                                                     Toast.makeText(getContext(), R.string.no_2_keyframes, Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Animation animation = animAdapter.getResult(); // TODO: 9.8.17 ulozit k device
-                                                    Device.Led d = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition()));
+                                                    Device.Led d = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1));
                                                     d.setAnimation(animation);
                                                     notifyDataSetChanged();
                                                     // TODO: 12.8.17 view.label.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
@@ -329,10 +294,10 @@ public class TabDashboardFragment extends Fragment {
             switch (viewHolder.getItemViewType()) {
                 case Type.LED: {
                     final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
-                    Device.Led device = (Device.Led) Dashboard.getDevice(position);
+                    Device.Led device = (Device.Led) Dashboard.getDevice(position - 1);
 
                     holder.name.setText(device.getName());
-                    holder.subname.setText(Dashboard.getParentRoom(position).name);
+                    holder.subname.setText(Dashboard.getParentRoom(position - 1).name);
                     holder.label.setText(device.getLabel(getContext()));
 
                     switch (device.getCharacter()) {
@@ -361,7 +326,7 @@ public class TabDashboardFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return Dashboard.numberOfDevices();
+            return Dashboard.numberOfDevices() + 1;
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
