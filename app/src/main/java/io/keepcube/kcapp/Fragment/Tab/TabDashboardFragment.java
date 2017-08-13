@@ -206,7 +206,7 @@ public class TabDashboardFragment extends Fragment {
 
                                     @Override
                                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-//                                        animAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+                                        animAdapter.onItemDismiss(viewHolder.getAdapterPosition());
                                     }
                                 }).attachToRecyclerView(recycler);
 
