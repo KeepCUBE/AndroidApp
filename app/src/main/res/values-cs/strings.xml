@@ -44,4 +44,6 @@
     <string name="room_name_hint">Obývák</string>
     <string name="set_led_to"></string>
     <string name="skip">Přeskočit</string>
+    <string name="device_removed_from_dash">Zařízení bylo odebráno</string>
+    <string name="undo">Vrátit</string>
 </resources>

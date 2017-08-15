@@ -60,5 +60,7 @@
     <string name="room_description_hint">Some description</string>
     <string name="set_led_to">Set LED to...</string>
     <string name="no_2_keyframes">Animation must have at least two keyframes.</string>
+    <string name="device_removed_from_dash">Device removed from dashboard</string>
+    <string name="undo">Undo</string>
 
 </resources>

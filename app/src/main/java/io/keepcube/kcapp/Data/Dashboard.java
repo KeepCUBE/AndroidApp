@@ -16,6 +16,10 @@ public class Dashboard {
     private static OnDeviceChangedListener deviceChangedListener = null;
 
 
+    private static int lastUnregisteredPosition = -1;
+    private static int lastRoomIndex = -1;
+    private static int lastDeviceIndex = -1;
+
     public static void load() {
         roomIndexes = Paper.book().read(Key.DASHBOARD_ROOM_INDEXES, new ArrayList<Integer>());
         deviceIndexes = Paper.book().read(Key.DASHBOARD_DEVICE_INDEXES, new ArrayList<Integer>());
@@ -42,15 +46,39 @@ public class Dashboard {
 
     }
 
-    public static void unregisterDevice(int position) {
+    public static Device unregisterDevice(int position) {
+        lastRoomIndex = roomIndexes.get(position);
+        lastDeviceIndex = deviceIndexes.get(position);
+        Device old = Home.room(roomIndexes.get(position)).device(deviceIndexes.get(position));
         roomIndexes.remove(position);
         deviceIndexes.remove(position);
+
+        lastUnregisteredPosition = position;
+
+        if (deviceChangedListener != null) {
+            deviceChangedListener.onDeviceRemoved(position);
+        }
+
+        return old;
         // TODO: 10.8.17 listener
     }
 
     public static Device getDevice(int position) {
         return Home.room(roomIndexes.get(position)).device(deviceIndexes.get(position));
     }
+
+
+    public static void restoreLastUnregistered() {
+
+
+        roomIndexes.add(lastUnregisteredPosition, lastRoomIndex);
+        deviceIndexes.add(lastUnregisteredPosition, lastDeviceIndex);
+
+        if (deviceChangedListener != null) {
+            deviceChangedListener.onDeviceAdded(lastUnregisteredPosition);
+        }
+    }
+
 
 
 //    public class Led {

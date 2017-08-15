@@ -4,6 +4,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -35,6 +36,7 @@ import io.keepcube.kcapp.Tools.Animation.Keyframe;
 import io.keepcube.kcapp.Tools.ColorPicker.ColorPickerPalette;
 import io.keepcube.kcapp.Tools.ColorPicker.ColorPickerSwatch;
 import io.keepcube.kcapp.Tools.ItemTouchHelperAdapter;
+import io.keepcube.kcapp.Tools.Snacker;
 import me.priyesh.chroma.ChromaDialog;
 import me.priyesh.chroma.ColorMode;
 import me.priyesh.chroma.ColorSelectListener;
@@ -60,7 +62,9 @@ public class TabDashboardFragment extends Fragment {
         new ItemTouchHelper(new ItemTouchHelper.Callback() {
             @Override
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-                return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, 0);
+                int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+                int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(dragFlags, swipeFlags);
             }
 
             @Override
@@ -101,8 +105,19 @@ public class TabDashboardFragment extends Fragment {
         }
 
         @Override
-        public void onItemDismiss(int position) {
-            // Nothing
+        public void onItemDismiss(final int position) {
+            if (getView() != null) {
+                Dashboard.unregisterDevice(position - 1);
+                Snacker.make(getView().getRootView().findViewById(R.id.coordinatorfabholder),
+                        getString(R.string.device_removed_from_dash), Snackbar.LENGTH_LONG)
+                        .setAction(R.string.undo, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Dashboard.restoreLastUnregistered();
+                            }
+                        })
+                        .show();
+            }
         }
 
         @Override
