@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private MaterialSheetFab materialSheetFab;
     private AppCompatActivity activity = this;
     private String barcodeMessage;
+    private String deviceName;
 
 
     @Override
@@ -133,7 +134,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(final View v) {
                 materialSheetFab.hideSheet();
-                continueBarcodeInit(context, v);
+                new MaterialDialog.Builder(context)
+                        .title(R.string.create_device)
+                        .customView(R.layout.di_device_input, true /*wrapInScrollView*/)
+                        // TODO: 20.7.17 .autoDismiss(false)
+                        .positiveText(R.string.positive_text)
+                        .negativeText(R.string.negative_text)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
+                                deviceName = ((EditText) dialog.getCustomView().findViewById(R.id.deviceNameInput)).getText().toString();
+                                continueBarcodeInit(context, v);
+                            }
+                        }).show();
+
             }
         });
 
@@ -223,157 +237,131 @@ public class MainActivity extends AppCompatActivity {
         if (xv != null) savedBarcodeSnackView = xv;
         final View v = savedBarcodeSnackView;
 
-        new MaterialDialog.Builder(context)
-                .title(R.string.create_device)
-                .customView(R.layout.di_device_input, true /*wrapInScrollView*/)
-                // TODO: 20.7.17 .autoDismiss(false)
-                .positiveText(R.string.positive_text)
+        // re-check permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
+            return;
+        }
+
+        // setup the QR reader
+        final View qrPreviewLayout = View.inflate(context, R.layout.di_qr_preview, null);
+
+        TextView c2ninfo = (TextView) qrPreviewLayout.findViewById(R.id.c2ninfo);
+
+        final MaterialDialog qrDiag = new MaterialDialog.Builder(context)
+                .title(R.string.scan_code)
+                .customView(qrPreviewLayout, false /*wrapInScrollView*/)
                 .negativeText(R.string.negative_text)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull final MaterialDialog dialog, @NonNull DialogAction which) {
-                        final String name = ((EditText) dialog.getCustomView().findViewById(R.id.deviceNameInput)).getText().toString();
+                .show();
 
-                        // re-check permission
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
-                            return;
+        final AutoFitTextureView cameraView = (AutoFitTextureView) qrPreviewLayout.findViewById(R.id.camera_view);
+
+        final BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
+                .setBarcodeFormats(Barcode.ALL_FORMATS)
+                .build();
+
+        final Camera2Source cameraSource = new Camera2Source.Builder(context, barcodeDetector)
+                .setFocusMode(Camera2Source.CAMERA_AF_CONTINUOUS_VIDEO)
+                .setFlashMode(Camera2Source.CAMERA_FLASH_AUTO)
+                .setFacing(Camera2Source.CAMERA_FACING_BACK)
+                .build();
+
+        c2ninfo.setText("Camera2Native = " + String.valueOf(cameraSource.isCamera2NativeCustom()));
+
+        cameraView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                            cameraSource.start(cameraView, Utils.getScreenRotation(context));
+                        } else {
+                            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                                Toast.makeText(context, R.string.no_permission_camera, Toast.LENGTH_SHORT).show();
+                            }
+                            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT); // TODO: 15.8.17 dialog
+                            qrDiag.dismiss(); // dialog will be shown again
                         }
-
-
-                        // setup the QR reader
-                        final View qrPreviewLayout = View.inflate(context, R.layout.di_qr_preview, null);
-
-                        TextView c2ninfo = (TextView) qrPreviewLayout.findViewById(R.id.c2ninfo);
-
-                        final MaterialDialog qrDiag = new MaterialDialog.Builder(context)
-                                .title(R.string.scan_code)
-                                .customView(qrPreviewLayout, false /*wrapInScrollView*/)
-                                .negativeText(R.string.negative_text)
-                                .show();
-
-
-                        final AutoFitTextureView cameraView = (AutoFitTextureView) qrPreviewLayout.findViewById(R.id.camera_view);
-//                      final TextView barcodeInfo = (TextView) qrPreviewLayout.findViewById(R.id.code_info);
-
-
-                        final BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
-                                .setBarcodeFormats(Barcode.ALL_FORMATS)
-                                .build();
-
-
-                        final Camera2Source cameraSource = new Camera2Source.Builder(context, barcodeDetector)
-                                .setFocusMode(Camera2Source.CAMERA_AF_CONTINUOUS_VIDEO)
-                                .setFlashMode(Camera2Source.CAMERA_FLASH_AUTO)
-                                .setFacing(Camera2Source.CAMERA_FACING_BACK)
-                                .build();
-
-
-                        c2ninfo.setText("Camera2Native = " + String.valueOf(cameraSource.isCamera2NativeCustom()));
-
-
-                        cameraView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-                            @Override
-                            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                                try {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                                            cameraSource.start(cameraView, Utils.getScreenRotation(context));
-                                        } else {
-                                            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                                                Toast.makeText(context, R.string.no_permission_camera, Toast.LENGTH_SHORT).show();
-                                            }
-                                            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_RESULT);
-                                            qrDiag.dismiss(); // dialog will be showed again
-                                        }
-                                    } else {
-                                        cameraSource.start(cameraView, Utils.getScreenRotation(context));
-                                    }
-                                } catch (IOException ie) {
-                                    Log.e("CAMERA SOURCE", ie.getMessage());
-                                }
-                            }
-
-                            @Override
-                            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
-
-                            @Override
-                            public void onSurfaceTextureUpdated(SurfaceTexture surface) {}
-
-                            @Override
-                            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                                cameraSource.stop();
-                                return false;
-                            }
-                        });
-
-
-                        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
-                            @Override
-                            public void receiveDetections(Detector.Detections<Barcode> detections) {
-                                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                                if (barcodes.size() != 0) {
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            barcodeMessage = barcodes.valueAt(0).displayValue;
-                                            qrDiag.dismiss();
-                                            barcodeDetector.release();
-                                        }
-                                    });
-                                }
-                            }
-
-                            @Override
-                            public void release() {
-                                new MaterialDialog.Builder(context)
-                                        .title(R.string.choose_room)
-                                        .content(barcodeMessage) // TODO: 9.8.17 remove
-                                        .positiveText(R.string.choose)
-                                        .negativeText(R.string.negative_text)
-                                        .items(Home.getRoomsNamesList())
-                                        .itemsCallbackSingleChoice(accessoriesFrag.getSelTabPos(), new MaterialDialog.ListCallbackSingleChoice() {
-                                            @Override
-                                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                                                Log.d(TAG, "onSelection: which:" + which);
-                                                Log.d(TAG, "onSelection: text:" + text);
-                                                // samozřejmě že ne
-                                                Snacker.make(v, getString(R.string.device_added_successfully), Snacker.LENGTH_SHORT).show();
-
-
-//                                              int type = parseBarcodeMessage().getType(); // TODO: 10.8.17 !
-//                                              int type = Type.LED;
-                                                int type = Integer.parseInt(barcodeMessage);
-
-                                                switch (type) {
-                                                    case Type.LED:
-                                                        Home.room(which).addDevice(new Device.Led(name));
-                                                        Dashboard.registerDevice(which, Home.room(which).numberOfDevices() - 1); // TODO: 11.8.17 !!!!!!!!!!!!!!!!!!!!!
-                                                        break;
-
-                                                    case Type.SWITCH:
-//                                                        Home.room(which).addDevice(new Device.Switch(name /*...*/));
-                                                        break;
-
-                                                    case Type.TEMPERATURE:
-
-                                                        break;
-
-
-                                                    default:
-                                                        // TODO: 9.8.17 custom
-                                                        break;
-                                                }
-
-
-                                                return true;
-                                            }
-                                        }).show();
-                            }
-                        });
-
+                    } else {
+                        cameraSource.start(cameraView, Utils.getScreenRotation(context));
                     }
-                }).show();
+                } catch (IOException ie) {
+                    Log.e("CAMERA SOURCE", ie.getMessage());
+                }
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {}
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                cameraSource.stop();
+                return false;
+            }
+        });
+
+        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+            @Override
+            public void receiveDetections(Detector.Detections<Barcode> detections) {
+                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
+                if (barcodes.size() != 0) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            barcodeMessage = barcodes.valueAt(0).displayValue;
+                            qrDiag.dismiss();
+                            barcodeDetector.release();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void release() {
+                new MaterialDialog.Builder(context)
+                        .title(R.string.choose_room)
+                        .positiveText(R.string.choose)
+                        .negativeText(R.string.negative_text)
+                        .items(Home.getRoomsNamesList())
+                        .itemsCallbackSingleChoice(accessoriesFrag.getSelTabPos(), new MaterialDialog.ListCallbackSingleChoice() {
+                            @Override
+                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                Log.d(TAG, "onSelection: which:" + which);
+                                Log.d(TAG, "onSelection: text:" + text);
+
+                                Snacker.make(v, getString(R.string.device_added_successfully), Snacker.LENGTH_SHORT).show();
+
+//                              int type = parseBarcodeMessage().getType(); // TODO: 10.8.17 !
+//                              int type = Type.LED;
+                                int type = Integer.parseInt(barcodeMessage);
+
+                                switch (type) {
+                                    case Type.LED:
+                                        Home.room(which).addDevice(new Device.Led(deviceName));
+                                        Dashboard.registerDevice(which, Home.room(which).numberOfDevices() - 1); // TODO: 11.8.17 !!!!!!!!!!!!!!!!!!!!!
+                                        break;
+
+                                    case Type.SWITCH:
+//                                      Home.room(which).addDevice(new Device.Switch(name /*...*/));
+                                        break;
+
+                                    case Type.TEMPERATURE:
+
+                                        break;
+
+                                    default:
+                                        // TODO: 9.8.17 custom
+                                        break;
+                                }
+
+                                return true;
+                            }
+                        }).show();
+            }
+        });
 
     }
 
@@ -390,21 +378,17 @@ public class MainActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        if (id == R.id.action_refresh) {
-            Toast.makeText(this, "Refreš", Toast.LENGTH_SHORT).show();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                Home.save();
+                return true;
+            case R.id.action_settings:
+                return true;
+            case R.id.action_clear_mem:
+                Paper.book().destroy();
+                return true;
         }
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "Zettingz", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        if (id == R.id.action_clear_mem) {
-            Paper.book().destroy();
-            return true;
-        }
-
 
         return super.onOptionsItemSelected(item);
     }
