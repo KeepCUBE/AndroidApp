@@ -44,10 +44,10 @@
     <string name="advanced">Advanced</string>
     <string name="config_own_device">Configure your own device</string>
 
-    <string name="select_color">Select a color</string>
+    <string name="select_color">Pick a color</string>
     <string name="time_n_s">Time: %ds</string>
     <string name="n_seconds">%ds</string>
-    <string name="select_time">Select a time</string>
+    <string name="select_time">Pick a time</string>
     <string name="animation_constructor">Animation Constructor</string>
     <string name="custom">Custom</string>
     <string name="animation">Animation</string>
