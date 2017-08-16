@@ -128,12 +128,79 @@ public class TabDashboardFragment extends Fragment {
         // Create new views (invoked by the layout manager)
         @Override
         public DashRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, final int viewType) {
+            int layout = R.layout.ri_nothing;
 
-            if (viewType == Type.LED) {
-                final View normalView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_dash_led, parent, false);
-                final ClassicViewHolder view = new ClassicViewHolder(normalView); // view holder for normal items
+            switch (viewType) {
+                case Type.LED:
+                    layout = R.layout.ri_dash_led;
+                    break;
 
-                view.colorBtnCard.setOnClickListener(new View.OnClickListener() {
+                case Type.HELPER:
+                    layout = R.layout.ri_nothing;
+                    break;
+            }
+
+            View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
+
+            switch (viewType) {
+                case Type.LED:
+                    return new LedViewHolder(view);
+
+                case Type.HELPER:
+                    return new SpaceViewHolder(view);
+            }
+
+            return null;
+        }
+
+        // Replace the contents of a view (invoked by the layout manager)
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            switch (holder.getItemViewType()) {
+                case Type.LED: {
+                    ((LedViewHolder) holder).bind(position);
+                    break;
+                }
+
+                case Type.HELPER:
+                    SpaceViewHolder spaceViewHolder = (SpaceViewHolder) holder;
+                    break;
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return Dashboard.numberOfDevices() + 1;
+        }
+
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            ViewHolder(View v) {
+                super(v);
+            }
+        }
+
+        class SpaceViewHolder extends ViewHolder {
+            SpaceViewHolder(View v) {
+                super(v);
+            }
+        }
+
+        class LedViewHolder extends ViewHolder {
+            TextView name;
+            TextView subname;
+            TextView label;
+            CardView colorBtnCard;
+
+            LedViewHolder(View v) {
+                super(v);
+                final LedViewHolder view = this;
+                name = (TextView) v.findViewById(R.id.name);
+                subname = (TextView) v.findViewById(R.id.subname);
+                label = (TextView) v.findViewById(R.id.color_txtw_fakebtn_fakelabel);
+                colorBtnCard = (CardView) v.findViewById(R.id.card_btn_color_led);
+
+                colorBtnCard.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         final View solidOrAnimLayout = getActivity().getLayoutInflater().inflate(R.layout.di_solid_or_anim, null);
@@ -227,7 +294,6 @@ public class TabDashboardFragment extends Fragment {
 
                                 CheckBox doLoop = (CheckBox) animLayout.findViewById(R.id.loop_chckbx);
 
-
                                 Animation lastAnimation = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1)).getAnimation();
 
                                 if (lastAnimation != null) {
@@ -291,83 +357,28 @@ public class TabDashboardFragment extends Fragment {
                         });
                     }
                 });
-
-
-                return view;
-
-            } else if (viewType == Type.HELPER) {
-                View headerRow = LayoutInflater.from(parent.getContext()).inflate(R.layout.ri_nothing, parent, false);
-                return new SpaceViewHolder(headerRow); // view holder for header items
             }
 
-            return null;
-        }
+            public void bind(int position) {
+                Device.Led device = (Device.Led) Dashboard.getDevice(position - 1);
+                name.setText(device.getName());
+                subname.setText(Dashboard.getParentRoom(position - 1).name);
+                label.setText(device.getLabel(getContext()));
 
-        // Replace the contents of a view (invoked by the layout manager)
-        @Override
-        public void onBindViewHolder(ViewHolder viewHolder, int position) {
-            switch (viewHolder.getItemViewType()) {
-                case Type.LED: {
-                    final ClassicViewHolder holder = (ClassicViewHolder) viewHolder;
-                    Device.Led device = (Device.Led) Dashboard.getDevice(position - 1);
+                switch (device.getCharacter()) {
+                    case Device.Led.CHARACTER_ANIM:
+                        colorBtnCard.setBackground(device.getAnimation().generateMultigradient(getContext()));
+                        label.setTextColor(0xffffffff); // TODO: 11.8.17 nejak vymyslet z multigradientu
+                        break;
 
-                    holder.name.setText(device.getName());
-                    holder.subname.setText(Dashboard.getParentRoom(position - 1).name);
-                    holder.label.setText(device.getLabel(getContext()));
-
-                    switch (device.getCharacter()) {
-                        case Device.Led.CHARACTER_ANIM:
-                            holder.colorBtnCard.setBackground(device.getAnimation().generateMultigradient(getContext()));
-                            holder.label.setTextColor(0xffffffff); // TODO: 11.8.17 nejak vymyslet z multigradientu
-                            break;
-
-                        case Device.Led.CHARACTER_SOLID:
-                            int color = device.getSolidColor();
-                            GradientDrawable dw = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color, color}); // TODO: 10.8.17 ?!
-                            dw.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getContext().getResources().getDisplayMetrics()));
-                            holder.colorBtnCard.setBackground(dw);
-                            holder.label.setTextColor(Keyframe.textColorFromBackground(color));
-                            break;
-                    }
-
-                    break;
+                    case Device.Led.CHARACTER_SOLID:
+                        int color = device.getSolidColor();
+                        GradientDrawable dw = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color, color}); // TODO: 10.8.17 ?!
+                        dw.setCornerRadius(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getContext().getResources().getDisplayMetrics()));
+                        colorBtnCard.setBackground(dw);
+                        label.setTextColor(Keyframe.textColorFromBackground(color));
+                        break;
                 }
-
-                case Type.HELPER:
-                    SpaceViewHolder spaceViewHolder = (SpaceViewHolder) viewHolder;
-                    break;
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return Dashboard.numberOfDevices() + 1;
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            ViewHolder(View v) {
-                super(v);
-            }
-        }
-
-        class SpaceViewHolder extends ViewHolder {
-            SpaceViewHolder(View v) {
-                super(v);
-            }
-        }
-
-        class ClassicViewHolder extends ViewHolder {
-            TextView name;
-            TextView subname;
-            TextView label;
-            CardView colorBtnCard;
-
-            ClassicViewHolder(View v) {
-                super(v);
-                name = (TextView) v.findViewById(R.id.name);
-                subname = (TextView) v.findViewById(R.id.subname);
-                label = (TextView) v.findViewById(R.id.color_txtw_fakebtn_fakelabel);
-                colorBtnCard = (CardView) v.findViewById(R.id.card_btn_color_led);
             }
         }
     }
