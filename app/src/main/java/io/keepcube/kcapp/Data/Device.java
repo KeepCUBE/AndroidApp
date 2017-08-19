@@ -28,6 +28,10 @@ public class Device {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public static class Dimmer extends Device {
         private int intenity = 0;

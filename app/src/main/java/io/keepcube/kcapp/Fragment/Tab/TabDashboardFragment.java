@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +48,7 @@ import me.priyesh.chroma.ColorSelectListener;
  * A simple {@link Fragment} subclass.
  */
 public class TabDashboardFragment extends Fragment {
+    final DashRecyclerAdapter adapter = new DashRecyclerAdapter();
     private String TAG = "TabDashboardFragment";
     private Context context = getContext();
     private Fragment fragment = this;
@@ -54,7 +56,6 @@ public class TabDashboardFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_fragment_dashboard, container, false);
-        final DashRecyclerAdapter adapter = new DashRecyclerAdapter();
         context = getContext();
 
         Dashboard.setOnDeviceChangedListener(adapter);
@@ -189,6 +190,41 @@ public class TabDashboardFragment extends Fragment {
             return Dashboard.numberOfDevices() + 1;
         }
 
+        private void universalActionsDialog(final int position) {
+            View view = View.inflate(context, R.layout.di_actions, null);
+
+            final EditText name = (EditText) view.findViewById(R.id.input_name_action);
+            name.setText(Dashboard.getDevice(position - 1).getName());
+
+            final MaterialDialog actionsDialog = new MaterialDialog.Builder(context)
+                    .title("Actions")
+                    .customView(view, false)
+                    .negativeText(R.string.negative_text)
+                    .positiveText(R.string.positive_text)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Dashboard.getDevice(position - 1).setName(name.getText().toString());
+                            notifyDataSetChanged();
+                        }
+                    }).show();
+
+            view.findViewById(R.id.remove_btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    actionsDialog.dismiss();
+                    adapter.onItemDismiss(position);
+                }
+            });
+
+            view.findViewById(R.id.group_btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    actionsDialog.dismiss();
+                    Toast.makeText(context, "Not implemented yet :(", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         class ViewHolder extends RecyclerView.ViewHolder {
             ViewHolder(View v) {
@@ -203,6 +239,7 @@ public class TabDashboardFragment extends Fragment {
         }
 
         class LedViewHolder extends ViewHolder {
+            CardView base;
             TextView name;
             TextView subname;
             TextView label;
@@ -211,10 +248,20 @@ public class TabDashboardFragment extends Fragment {
             LedViewHolder(View v) {
                 super(v);
                 final LedViewHolder view = this;
+                base = (CardView) v.findViewById(R.id.base_card);
                 name = (TextView) v.findViewById(R.id.name);
                 subname = (TextView) v.findViewById(R.id.subname);
                 label = (TextView) v.findViewById(R.id.color_txtw_fakebtn_fakelabel);
                 colorBtnCard = (CardView) v.findViewById(R.id.card_btn_color_led);
+
+                base.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        universalActionsDialog(view.getAdapterPosition());
+
+                    }
+                });
 
                 colorBtnCard.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -398,8 +445,8 @@ public class TabDashboardFragment extends Fragment {
             }
         }
 
-
         class DimmerViewHolder extends ViewHolder {
+            CardView base;
             TextView name;
             TextView subname;
             SeekBar seek;
@@ -408,10 +455,18 @@ public class TabDashboardFragment extends Fragment {
             DimmerViewHolder(View v) {
                 super(v);
                 final DimmerViewHolder view = this;
+                base = (CardView) v.findViewById(R.id.base_card);
                 name = (TextView) v.findViewById(R.id.name);
                 subname = (TextView) v.findViewById(R.id.subname);
                 seek = (SeekBar) v.findViewById(R.id.IntensitySeek);
                 output = (TextView) v.findViewById(R.id.intensityOutputTextView);
+
+                base.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        universalActionsDialog(view.getAdapterPosition());
+                    }
+                });
 
                 seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
