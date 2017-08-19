@@ -91,9 +91,11 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_dashboard:
                         fadeFragment(dashFrag);
                         break;
+
                     case R.id.nav_rooms:
                         fadeFragment(roomsFrag);
                         break;
+
                     case R.id.nav_accessories:
                         fadeFragment(accessoriesFrag);
                         break;
@@ -350,6 +352,11 @@ public class MainActivity extends AppCompatActivity {
 
                                     case Type.TEMPERATURE:
 
+                                        break;
+
+                                    case Type.DIMMER:
+                                        Home.room(which).addDevice(new Device.Dimmer(deviceName));
+                                        Dashboard.registerDevice(which, Home.room(which).numberOfDevices() - 1); // TODO: 11.8.17 !!!!!!!!!!!!!!!!!!!!!
                                         break;
 
                                     default:

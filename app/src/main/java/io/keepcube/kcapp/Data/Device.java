@@ -29,6 +29,29 @@ public class Device {
     }
 
 
+    public static class Dimmer extends Device {
+        private int intenity = 0;
+
+        public Dimmer(@NonNull String name) {
+            super(name, Type.DIMMER);
+        }
+
+
+        public int getIntenity() {
+            return intenity;
+        }
+
+        public void setIntenity(int intenity) {
+            this.intenity = intenity;
+        }
+
+        public String getLabel(Context context) {
+            return String.format(context.getString(R.string.intensity_format), intenity);
+        }
+
+    }
+
+
     public static class Led extends Device {
         public static final int CHARACTER_SOLID = 1;
         public static final int CHARACTER_ANIM = 2;

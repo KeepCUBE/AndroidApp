@@ -62,5 +62,6 @@
     <string name="no_2_keyframes">Animation must have at least two keyframes.</string>
     <string name="device_removed_from_dash">Device removed from dashboard</string>
     <string name="undo">Undo</string>
+    <string name="intensity_format">Intensity: %d%%</string>
 
 </resources>

@@ -46,4 +46,5 @@
     <string name="skip">Přeskočit</string>
     <string name="device_removed_from_dash">Zařízení bylo odebráno</string>
     <string name="undo">Vrátit</string>
+    <string name="intensity_format">Intenzita: %d%%</string>
 </resources>

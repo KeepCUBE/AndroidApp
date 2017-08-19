@@ -1,5 +1,6 @@
 package io.keepcube.kcapp.Fragment.Tab;
 
+import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,12 +48,16 @@ import me.priyesh.chroma.ColorSelectListener;
  */
 public class TabDashboardFragment extends Fragment {
     private String TAG = "TabDashboardFragment";
+    private Context context = getContext();
     private Fragment fragment = this;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_fragment_dashboard, container, false);
         final DashRecyclerAdapter adapter = new DashRecyclerAdapter();
+        context = getContext();
+
+        Dashboard.setOnDeviceChangedListener(adapter);
 
         RecyclerView recycler = (RecyclerView) view.findViewById(R.id.recycler);
         recycler.setHasFixedSize(true);
@@ -64,7 +70,7 @@ public class TabDashboardFragment extends Fragment {
             public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
                 int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
                 int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-                return makeMovementFlags(dragFlags, swipeFlags);
+                return makeMovementFlags(dragFlags, 0);
             }
 
             @Override
@@ -78,8 +84,6 @@ public class TabDashboardFragment extends Fragment {
                 adapter.onItemDismiss(viewHolder.getAdapterPosition());
             }
         }).attachToRecyclerView(recycler);
-
-        Dashboard.setOnDeviceChangedListener(adapter);
 
         return view;
     }
@@ -135,6 +139,10 @@ public class TabDashboardFragment extends Fragment {
                     layout = R.layout.ri_dash_led;
                     break;
 
+                case Type.DIMMER:
+                    layout = R.layout.ri_dash_dimmer;
+                    break;
+
                 case Type.HELPER:
                     layout = R.layout.ri_nothing;
                     break;
@@ -145,6 +153,9 @@ public class TabDashboardFragment extends Fragment {
             switch (viewType) {
                 case Type.LED:
                     return new LedViewHolder(view);
+
+                case Type.DIMMER:
+                    return new DimmerViewHolder(view);
 
                 case Type.HELPER:
                     return new SpaceViewHolder(view);
@@ -159,6 +170,11 @@ public class TabDashboardFragment extends Fragment {
             switch (holder.getItemViewType()) {
                 case Type.LED: {
                     ((LedViewHolder) holder).bind(position);
+                    break;
+                }
+
+                case Type.DIMMER: {
+                    ((DimmerViewHolder) holder).bind(position);
                     break;
                 }
 
@@ -223,7 +239,7 @@ public class TabDashboardFragment extends Fragment {
                             public void onClick(View v) {
                                 solidOrAnimDiag.dismiss();
 
-                                final ColorPickerPalette colorPickerPalette = (ColorPickerPalette) View.inflate(getContext(), R.layout.color_picker, null);
+                                final ColorPickerPalette colorPickerPalette = (ColorPickerPalette) View.inflate(context, R.layout.color_picker, null);
                                 final MaterialDialog colorSelectDialog = new MaterialDialog.Builder(getContext())
                                         .customView(colorPickerPalette, true /*wrapInScrollView*/)
                                         .title(R.string.select_color)
@@ -233,7 +249,7 @@ public class TabDashboardFragment extends Fragment {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                                 new ChromaDialog.Builder()
-                                                        .initialColor(ContextCompat.getColor(getContext(), R.color.colorPrimary))
+                                                        .initialColor(ContextCompat.getColor(context, R.color.colorPrimary))
                                                         .colorMode(ColorMode.RGB) // There's also ARGB and HSV
                                                         .onColorSelected(new ColorSelectListener() {
                                                             @Override
@@ -245,7 +261,7 @@ public class TabDashboardFragment extends Fragment {
                                             }
                                         }).show();
 
-                                final int[] materialRainbow = getContext().getResources().getIntArray(R.array.md_rainbow_500);
+                                final int[] materialRainbow = context.getResources().getIntArray(R.array.md_rainbow_500);
                                 colorPickerPalette.init(materialRainbow.length, /* (int) Math.ceil(Math.sqrt(materialRainbow.length)) */ 4, new ColorPickerSwatch.OnColorSelectedListener() {
                                     @Override
                                     public void onColorSelected(int color) {
@@ -264,7 +280,7 @@ public class TabDashboardFragment extends Fragment {
                                 solidOrAnimDiag.dismiss();
                                 View animLayout = getActivity().getLayoutInflater().inflate(R.layout.di_anim_constructor, null);
 
-                                final AnimRecyclerAdapter animAdapter = new AnimRecyclerAdapter(getContext(), fragment);
+                                final AnimRecyclerAdapter animAdapter = new AnimRecyclerAdapter(context, fragment);
 
                                 RecyclerView recycler = (RecyclerView) animLayout.findViewById(R.id.recycler);
                                 recycler.setHasFixedSize(true);
@@ -300,7 +316,7 @@ public class TabDashboardFragment extends Fragment {
                                     animAdapter.preset(lastAnimation);
                                     doLoop.setChecked(lastAnimation.loop);
                                 } else {
-                                    animAdapter.add(new Keyframe(ContextCompat.getColor(getContext(), R.color.colorPrimary), 1));
+                                    animAdapter.add(new Keyframe(ContextCompat.getColor(context, R.color.colorPrimary), 1));
                                 }
 
                                 doLoop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -313,7 +329,7 @@ public class TabDashboardFragment extends Fragment {
                                 animLayout.findViewById(R.id.add_color_btn).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        animAdapter.add(new Keyframe(ContextCompat.getColor(getContext(), R.color.colorPrimary), 1)); // Add color keyframe
+                                        animAdapter.add(new Keyframe(ContextCompat.getColor(context, R.color.colorPrimary), 1)); // Add color keyframe
                                     }
                                 });
 
@@ -342,7 +358,7 @@ public class TabDashboardFragment extends Fragment {
                                                 // TODO: 1.8.17 send animation data to server
 
                                                 if (animAdapter.getItemCount() < 2) {
-                                                    Toast.makeText(getContext(), R.string.no_2_keyframes, Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(context, R.string.no_2_keyframes, Toast.LENGTH_SHORT).show();
                                                 } else {
                                                     Animation animation = animAdapter.getResult(); // TODO: 9.8.17 ulozit k device
                                                     Device.Led d = ((Device.Led) Dashboard.getDevice(view.getAdapterPosition() - 1));
@@ -381,5 +397,49 @@ public class TabDashboardFragment extends Fragment {
                 }
             }
         }
+
+
+        class DimmerViewHolder extends ViewHolder {
+            TextView name;
+            TextView subname;
+            SeekBar seek;
+            TextView output;
+
+            DimmerViewHolder(View v) {
+                super(v);
+                final DimmerViewHolder view = this;
+                name = (TextView) v.findViewById(R.id.name);
+                subname = (TextView) v.findViewById(R.id.subname);
+                seek = (SeekBar) v.findViewById(R.id.IntensitySeek);
+                output = (TextView) v.findViewById(R.id.intensityOutputTextView);
+
+                seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if (fromUser) {
+                            Device.Dimmer device = (Device.Dimmer) Dashboard.getDevice(view.getAdapterPosition() - 1);
+                            device.setIntenity(progress);
+                            output.setText(device.getLabel(context)); // Instead of notifyDataSetChanged() - performance issue
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
+            }
+
+            public void bind(int position) {
+                Device.Dimmer device = (Device.Dimmer) Dashboard.getDevice(position - 1);
+                name.setText(device.getName());
+                subname.setText(Dashboard.getParentRoom(position - 1).name);
+                seek.setProgress(device.getIntenity());
+                output.setText(device.getLabel(getContext()));
+            }
+        }
+
+
     }
 }

@@ -12,6 +12,7 @@ public class Type {
     public static final int LED = 1;
     public static final int SWITCH = 2;
     public static final int TEMPERATURE = 3;
+    public static final int DIMMER = 4;
 
 //    public static int custom() {
 //        return Integer.MAX_VALUE;
