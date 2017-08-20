@@ -22,5 +22,10 @@
         app:showAsAction="never"/>
 
 
+    <item
+        android:id="@+id/action_clear_onetimes"
+        android:title="Clear one-time checks"
+        app:showAsAction="never"/>
+
 
 </menu>

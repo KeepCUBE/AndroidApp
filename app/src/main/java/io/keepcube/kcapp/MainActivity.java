@@ -42,7 +42,9 @@ import java.io.IOException;
 
 import io.keepcube.kcapp.Data.Dashboard;
 import io.keepcube.kcapp.Data.Device;
+import io.keepcube.kcapp.Data.FirstTime;
 import io.keepcube.kcapp.Data.Home;
+import io.keepcube.kcapp.Data.Key;
 import io.keepcube.kcapp.Data.Type;
 import io.keepcube.kcapp.Fragment.AccessoriesFragment;
 import io.keepcube.kcapp.Fragment.DashboardFragment;
@@ -78,9 +80,19 @@ public class MainActivity extends AppCompatActivity {
 //        Home.Cube.setIP("192.168.0.2");
 //        Home.autoSave(context, 10);
 
-        Log.e("Paper keys", Paper.book().getAllKeys().toString());
 
-        fadeFragment(dashFrag);
+        if (FirstTime.is(Key.STARTUP)) {
+            new MaterialDialog.Builder(context)
+                    .title("First time!")
+                    .content("Hi, welcome! :)\nTODO: Tutorial")
+                    .positiveText("Start using app")
+                    .show();
+        }
+
+
+//        Log.e("Paper keys", Paper.book().getAllKeys().toString());
+
+        fadeFragment(dashFrag); // Default fragment TODO: configurable?
 
         final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -394,6 +406,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_clear_mem:
                 Paper.book().destroy();
+                Toast.makeText(activity, "Done", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_clear_onetimes:
+                Paper.book("FirstTime").destroy();
+                Toast.makeText(activity, "Done", Toast.LENGTH_SHORT).show();
                 return true;
         }
 

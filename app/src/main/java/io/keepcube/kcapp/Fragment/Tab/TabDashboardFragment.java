@@ -31,6 +31,8 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import io.keepcube.kcapp.Data.Dashboard;
 import io.keepcube.kcapp.Data.Device;
+import io.keepcube.kcapp.Data.FirstTime;
+import io.keepcube.kcapp.Data.Key;
 import io.keepcube.kcapp.Data.Type;
 import io.keepcube.kcapp.R;
 import io.keepcube.kcapp.Tools.Animation.AnimRecyclerAdapter;
@@ -213,7 +215,25 @@ public class TabDashboardFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     actionsDialog.dismiss();
-                    adapter.onItemDismiss(position);
+
+                    if (FirstTime.is(Key.DASH_REMOVE)) {
+                        new MaterialDialog.Builder(context)
+                                .title("Remove")
+                                .content("NOTE: Device will not be removed completely, it will be only removed from dashboard. You can add it to dashboard whenever you want.")
+                                .items("Don't show again")
+                                .positiveText(R.string.positive_text)
+                                .negativeText(R.string.negative_text)
+                                .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                                    @Override
+                                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                                        if (which.length == 0) FirstTime.reset(Key.DASH_REMOVE); // Not checked - resetting one time entry
+                                        adapter.onItemDismiss(position);
+                                        return true;
+                                    }
+                                }).show();
+                    } else {
+                        adapter.onItemDismiss(position);
+                    }
                 }
             });
 
