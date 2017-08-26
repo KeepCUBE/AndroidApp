@@ -493,7 +493,7 @@ public class TabDashboardFragment extends Fragment {
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         if (fromUser) {
                             Device.Dimmer device = (Device.Dimmer) Dashboard.getDevice(view.getAdapterPosition() - 1);
-                            device.setIntenity(progress);
+                            device.setIntensity(progress);
                             output.setText(device.getLabel(context)); // Instead of notifyDataSetChanged() - performance issue
                         }
                     }
@@ -510,7 +510,7 @@ public class TabDashboardFragment extends Fragment {
                 Device.Dimmer device = (Device.Dimmer) Dashboard.getDevice(position - 1);
                 name.setText(device.getName());
                 subname.setText(Dashboard.getParentRoom(position - 1).name);
-                seek.setProgress(device.getIntenity());
+                seek.setProgress(device.getIntensity());
                 output.setText(device.getLabel(getContext()));
             }
         }

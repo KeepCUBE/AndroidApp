@@ -19,7 +19,6 @@ public class Device {
         this.type = type;
     }
 
-    // No setters - only getters!
     public int getType() {
         return type;
     }
@@ -34,25 +33,23 @@ public class Device {
 
 
     public static class Dimmer extends Device {
-        private int intenity = 0;
+        private int intensity = 0;
 
         public Dimmer(@NonNull String name) {
             super(name, Type.DIMMER);
         }
 
-
-        public int getIntenity() {
-            return intenity;
+        public int getIntensity() {
+            return intensity;
         }
 
-        public void setIntenity(int intenity) {
-            this.intenity = intenity;
+        public void setIntensity(int intensity) {
+            this.intensity = intensity;
         }
 
         public String getLabel(Context context) {
-            return String.format(context.getString(R.string.intensity_format), intenity);
+            return String.format(context.getString(R.string.intensity_format), intensity);
         }
-
     }
 
 
@@ -92,10 +89,9 @@ public class Device {
 
                 case CHARACTER_SOLID:
                     return context.getResources().getString(R.string.color);
-
-                default:
-                    return "Not possible!";
             }
+
+            return null;
         }
 
         public int getCharacter() {
