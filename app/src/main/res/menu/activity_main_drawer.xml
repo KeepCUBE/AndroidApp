@@ -24,8 +24,8 @@
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/nav_own_device"
-                    android:icon="@drawable/ic_xmenu_manage"
-                    android:title="@string/config_own_device"/>
+                    android:icon="@drawable/ic_xmenu_flask"
+                    android:title="@string/create_own_device"/>
             </group>
         </menu>
     </item>

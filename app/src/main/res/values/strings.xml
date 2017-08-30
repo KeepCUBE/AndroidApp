@@ -1,49 +1,36 @@
 <resources>
     <string name="app_name">KeepCUBE App</string>
 
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
 
     <string name="dashboard">Dashboard</string>
     <string name="rooms">Rooms</string>
     <string name="accessories">Accessories</string>
     <string name="tools">Tools</string>
-
     <string name="action_settings">Settings</string>
     <string name="action_refresh">Refresh</string>
-
     <string name="add_room">Add a room</string>
     <string name="add_device">Add a device</string>
-
     <string name="remove">Remove</string>
     <string name="keep">Keep</string>
-
     <string name="room_name">Room name</string>
     <string name="device_name">Device name</string>
-
     <string name="positive_text">OK</string>
     <string name="negative_text">Cancel</string>
     <string name="choose">Choose</string>
-
     <string name="create_device">Create a device</string>
     <string name="choose_room">Choose the room</string>
     <string name="scan_code">Scan the code from the label</string>
-
     <string name="name_taken">This name is already taken!</string>
     <string name="choose_another_name">Choose another name, this is already taken</string>
-
     <string name="cannot_camera_permission">Cannot run application because camera service permissions have not been granted</string>
     <string name="no_permission_camera">No permission to use the camera services</string>
-
     <string name="device_added_successfully">Device added successfully!</string>
-
     <string name="sure_remove_room">Are you sure to remove \"%s\"? All devices assigned to this room will be moved to \"Uncategorized\".</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="advanced">Advanced</string>
-    <string name="config_own_device">Configure your own device</string>
-
+    <string name="create_own_device">Create your own device</string>
     <string name="select_color">Pick a color</string>
     <string name="time_n_s">Time: %ds</string>
     <string name="n_seconds">%ds</string>
